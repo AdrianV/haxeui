@@ -3,8 +3,110 @@ package haxe.ui.toolkit.core;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
+typedef RuleTemplate = {
+	content: String,
+	params: Array<String>,
+	def: Array<String>,
+}
+
+typedef CodePart = {
+	var_part: String,
+	code_part: String,
+}
+
 class Macros {
+	
+	private static function getNextRule(content: String, start: Int): {rule: String, content: String, end: Int} {
+		var first = content.indexOf("{", start);
+		if (first == -1) return {rule: "", content: "", end: -1};
+		var n = first + 1;
+		var nClose: Int = content.indexOf("}", n);
+		var nOpen: Int = content.indexOf("{", n);
+		var xOpen = 0;
+		do {
+			while (nOpen != -1 && nOpen < nClose) {
+				xOpen ++;
+				n = nOpen + 1;
+				nOpen = content.indexOf("{", n);
+			}
+			while (nClose != -1 && (nClose < nOpen || nOpen == -1)) {
+				xOpen --;
+				if (xOpen < 0) {
+					return {rule: StringTools.trim(content.substring(start, first)), content: content.substring(first + 1, nClose), end: nClose + 1};
+				}
+				n = nClose + 1;
+				nClose = content.indexOf("}", n);
+			}
+		} while (nOpen != -1 && nClose != -1);
+		return {rule: StringTools.trim(content.substring(start, first)), content: content.substring(first + 1), end: -1};
+	}
+	
+	private static var ruleTemplates: Map<String, RuleTemplate>;
+	private static var ruleVars: Map<String, Void>;
+	
+	private static function parseGlobal(content: String): String {
+		var res = "";
+		var lines = new LineIterator(content);
+		for (line in lines) {
+			var pos = line.indexOf("{");
+			if (pos == -1) {
+				pos = line.indexOf(":");
+				if (pos >= 0) {
+					var name = StringTools.trim(line.substring(0, pos));
+					if (! ruleVars.exists(name)) {
+						res += "var ";
+						ruleVars.set(name, null);
+					}
+					res += name + " = " + StringTools.trim(line.substring(pos + 1)) + "\n";
+				}
+			} else {
+				var part = getNextRule(content, lines.pos);
+				var template: RuleTemplate = {
+					content: null,
+					params: new Array(),
+					def: new Array(),
+				}
+				var name = part.rule;
+				if ( name.charAt(0) != "@" ) name = "@" + name;
+				var pOpen = name.indexOf("(");
+				if (pOpen >= 0) {
+					var pClose = name.lastIndexOf(")");
+					if (pClose > pOpen) {
+						var params = name.substring(pOpen + 1, pClose).split(",");
+						name = name.substring(0, pOpen);
+						for (p in params) {
+							pos = p.indexOf("=");
+							var def = "";
+							if (pos == -1) {
+								pos = p.indexOf(":");
+							} else {
+								def = p.substring(pos);
+							}
+							var vname = (pos >= 0) ? p.substring(0, pos): p;
+							vname = name.substring(1) + "__" + (vname.charAt(0) == "@" ? vname.substring(1): vname);
+							res += 'var $vname' + (pos >= 0 ? p.substring(pos) : ": Dynamic");
+							res += ";\n";
+							template.params.push(vname);
+							template.def.push(def);
+						}
+					} else {
+						trace('warning $name has open parenthesis');
+						name = name.substring(0, pOpen);
+					}
+					
+				}
+				template.content = StringTools.replace(part.content, "@", name.substring(1) + "__");
+				ruleTemplates.set(name, template);
+				lines.goto(part.end);
+			}
+		} 
+		//trace(res);
+		return res;
+	}
+	
 	macro public static function addStyleSheet(resourcePath:String):Expr {
+		ruleTemplates = new Map();
+		ruleVars = new Map();
 		if (sys.FileSystem.exists(resourcePath) == false) {
 			var paths:Array<String> = Context.getClassPath();
 			for (path in paths) {
@@ -18,32 +120,60 @@ class Macros {
 		
 		var contents:String = sys.io.File.getContent(resourcePath);
 		var code:String = "function() {\n";
-		var arr:Array<String> = contents.split("}");
-		
-		for (s in arr) {
-			if (StringTools.trim(s).length > 0) {
-				var n:Int = s.indexOf("{");
-				var rule:String = StringTools.trim(s.substring(0, n));
-				var style:String = s.substring(n + 1, s.length);
-				style = StringTools.replace(style, "\"", "\\\"");
-				code += "\tMacros.addStyle(\"" + rule + "\", \"" + style + "\");\n";
+		var x = 0;
+		while (x != -1) {
+			var part = getNextRule(contents, x);
+			if (part.rule != "") {
+				if (part.rule == "@") {
+					code += parseGlobal(part.content);
+				} else {
+					var style = StringTools.replace(part.content, "\"", "\\\"");
+					code += "\tMacros.addStyle(\"" + part.rule + "\", \"" + style + "\");\n";
+				}
 			}
+			x = part.end;
 		}
 		code += "}()\n";
 		//trace(code);
 		return Context.parseInlineString(code, Context.currentPos());
 	}
 	
-	macro public static function addStyle(rule:String, style:String):Expr {
-		var code:String = "function() {\n";
-		
-		code += "\tvar style:haxe.ui.toolkit.style.Style = new haxe.ui.toolkit.style.Style({\n";
-		var styles:Array<String> = style.split(";");
-		for (styleData in styles) {
-			styleData = StringTools.trim(styleData);
-			if (styleData.length > 0) {
-				var props:Array<String> = styleData.split(":");
-				var propName:String = StringTools.trim(props[0]);
+	private static function codeStyleData(styleData: String): CodePart {
+		var res = { var_part: "", code_part: "" };
+		if (styleData.length > 0) {
+			var props:Array<String> = styleData.substr(0, styleData.length-1).split(":");
+			var propName:String = StringTools.trim(props[0]);
+			if (StringTools.startsWith(propName, "@")) {
+				var pOpen = propName.indexOf("(");
+				var pClose = propName.indexOf(")");
+				var name = (pOpen >= 0) ? propName.substring(0, pOpen) : propName;
+				var template = ruleTemplates.get(name);
+				var i = 0;
+				if (pOpen >= 0 && pClose > pOpen) {
+					var params = propName.substring(pOpen + 1, pClose).split(",");
+					while (i < params.length && i < template.params.length) {
+						res.var_part += template.params[i] + " = " + params[i] + ";\n";
+						i++;
+					}
+				}
+				while (i < template.params.length) {
+					if (template.def[i] != "") {
+						res.var_part += template.params[i] + template.def[i] + ";\n";
+					}
+					i++;
+				}					
+				if (template != null) {
+					var lines = new LineIterator(template.content);
+					
+					for (line in lines) {
+						res.code_part += codeStyleData(line).code_part;
+					}
+					//trace(res.var_part + res.code_part);
+				} else {
+					trace('warning template $propName not found !');
+					//trace(ruleTemplates);
+				}
+			} else if (props.length > 1) {
 				var propValue:String = StringTools.trim(props[1]);
 				
 				if (propName == "width" && propValue.indexOf("%") != -1) { // special case for width
@@ -83,14 +213,28 @@ class Macros {
 					propValue = "0x" + propValue.substr(1, propValue.length - 1);
 				}
 				
-				code += "\t\t" + propName + ":" + propValue + ",\n";
+				res.code_part = "\t\t" + propName + ":" + propValue + ",\n";
 			}
+		}		
+		return res;
+	}
+	
+	macro public static function addStyle(rule:String, style:String):Expr {
+		var code: CodePart = { var_part: "", code_part: ""};
+		
+		code.code_part += "\tvar style:haxe.ui.toolkit.style.Style = new haxe.ui.toolkit.style.Style({\n";
+		var lines = new LineIterator(style);
+		for (styleData in lines) {
+			var x = codeStyleData(styleData);
+			code.code_part += x.code_part;
+			code.var_part += x.var_part;
 		}
-		code += "\t});\n";
-		code += "\thaxe.ui.toolkit.style.StyleManager.instance.addStyle(\"" + rule + "\", style);\n";
+		code.code_part += "\t});\n";
+		code.code_part += "\thaxe.ui.toolkit.style.StyleManager.instance.addStyle(\"" + rule + "\", style);\n";
 				
-		code += "}()\n";
-		return Context.parseInlineString(code, Context.currentPos());
+		var s = "function() {\n" + code.var_part + code.code_part  + "}()\n";
+		//trace(s);
+		return Context.parseInlineString(s, Context.currentPos());
 	}
 	
 	macro public static function registerComponentPackage(pack:String, prefix:String):Expr {
@@ -105,6 +249,7 @@ class Macros {
 			if(!sys.FileSystem.exists(dir) || !sys.FileSystem.isDirectory(dir)) {
 				continue;
 			}
+			trace(dir);
 			var files:Array<String> = sys.FileSystem.readDirectory(dir);
 			if (files != null) {
 				for (file in files) {
@@ -234,4 +379,32 @@ class Macros {
 		
 		return has;
 	}
+}
+
+
+private class LineIterator {
+	
+	private var _ns: Int;
+	private var _ne: Int;
+	private var _content: String;
+	public var pos(default, null): Int;
+	public function new(content: String) {
+		_content = content;
+		_ns = 0;
+		_ne = 0;
+	}
+	
+	public inline function hasNext(): Bool {
+		if (_ne != -1 && _ns != -1) _ne = _content.indexOf(";", _ns);
+		return _ne != -1 && _ns != -1 ;
+	}
+	
+	public inline function next() : String {
+		var res = (_ne == -1) ? _content.substring(_ns) : _content.substring(_ns, _ne +1);
+		pos = _ns;
+		_ns = _ne + 1;
+		return StringTools.trim(res);
+	}
+	
+	public inline function goto(start: Int) _ns = start;
 }
