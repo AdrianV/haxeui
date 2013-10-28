@@ -2,12 +2,8 @@ package haxe.ui.toolkit.core;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
-
-typedef RuleTemplate = {
-	content: String,
-	params: Array<String>,
-	def: Array<String>,
-}
+import haxe.ui.toolkit.style.RuleIterator;
+import haxe.ui.toolkit.style.RuleTemplateParser;
 
 typedef CodePart = {
 	var_part: String,
@@ -16,54 +12,26 @@ typedef CodePart = {
 
 class Macros {
 		
-	private static var ruleTemplates: Map<String, RuleTemplate>;
-	private static var ruleVars: Map<String, Void>;
+	private static var _ruleTemplates: Map<String, RuleTemplate>;
+	private static var _ruleVars: Map<String, Void>;
 	
 	private static function parseGlobal(content: String): String {
 		var res = "";
-		var lines = new ExpressionIterator(content, true);
+		var lines = new RuleIterator(content, true);
 		for (line in lines) {
 			switch(line.delim) {
 				case "{": {
-					var template: RuleTemplate = {
-						content: line.content,
-						params: new Array(),
-						def: new Array(),
+					var template = RuleTemplateParser.parse(line);
+					for (param in template.params) {
+						res += "var " + param.name + " = " + (param.def != "" ? param.def : ": Dynamic");
+						res += ";\n";
 					}
-					var name = line.prefix;
-					if ( name.charAt(0) != "@" ) name = "@" + name;
-					var pOpen = name.indexOf("(");
-					if (pOpen >= 0) {
-						var pClose = name.lastIndexOf(")");
-						if (pClose > pOpen) {
-							var params = name.substring(pOpen + 1, pClose).split(",");
-							name = name.substring(0, pOpen);
-							for (p in params) {
-								var pos = p.indexOf("=");
-								var def = "";
-								if (pos == -1) {
-									pos = p.indexOf(":");
-								} else {
-									def = p.substring(pos);
-								}
-								var vname = (pos >= 0) ? p.substring(0, pos): p;
-								vname = name.substring(1) + "__" + (vname.charAt(0) == "@" ? vname.substring(1): vname);
-								res += 'var $vname' + (pos >= 0 ? p.substring(pos) : ": Dynamic");
-								res += ";\n";
-								template.params.push(vname);
-								template.def.push(def);
-							}
-						} else {
-							trace('warning $name has open parenthesis');
-							name = name.substring(0, pOpen);
-						}
-					}
-					ruleTemplates.set(name, template);
+					_ruleTemplates.set(template.name, template);
 				}
 				case ":" : {
-					if (! ruleVars.exists(line.prefix)) {
+					if (! _ruleVars.exists(line.prefix)) {
 						res += "var ";
-						ruleVars.set(line.prefix, null);
+						_ruleVars.set(line.prefix, null);
 					}
 					res += line.prefix + " = " + line.content + ";\n";
 				}
@@ -75,8 +43,8 @@ class Macros {
 	
 	
 	macro public static function addStyleSheet(resourcePath:String):Expr {
-		ruleTemplates = new Map();
-		ruleVars = new Map();
+		_ruleTemplates = new Map();
+		_ruleVars = new Map();
 		if (sys.FileSystem.exists(resourcePath) == false) {
 			var paths:Array<String> = Context.getClassPath();
 			for (path in paths) {
@@ -90,7 +58,7 @@ class Macros {
 		
 		var contents:String = sys.io.File.getContent(resourcePath);
 		var code:String = "function() {\n";
-		var rules = new ExpressionIterator(contents, false);
+		var rules = new RuleIterator(contents, false);
 		for (rule in rules) {
 			if (rule.prefix != "") {
 				if (rule.prefix == "@") {
@@ -106,31 +74,32 @@ class Macros {
 		return Context.parseInlineString(code, Context.currentPos());
 	}
 	
-	private static function codeStyleData(styleData: ExpressionIteratorResult): CodePart {
+	private static function codeStyleData(styleData: RuleIteratorResult): CodePart {
 		var res = { var_part: "", code_part: "" };
 		if (styleData.prefix.length > 0) {
 			var propName = styleData.prefix;
 			if (StringTools.startsWith(propName, "@")) {
 				var pOpen = propName.indexOf("(");
 				var pClose = propName.indexOf(")");
-				var name = (pOpen >= 0) ? propName.substring(0, pOpen) : propName;
-				var template = ruleTemplates.get(name);
-				var i = 0;
-				if (pOpen >= 0 && pClose > pOpen) {
-					var params = propName.substring(pOpen + 1, pClose).split(",");
-					while (i < params.length && i < template.params.length) {
-						res.var_part += template.params[i] + " = " + params[i] + ";\n";
-						i++;
-					}
-				}
-				while (i < template.params.length) {
-					if (template.def[i] != "") {
-						res.var_part += template.params[i] + template.def[i] + ";\n";
-					}
-					i++;
-				}					
+				var name = (pOpen >= 0) ? propName.substring(1, pOpen) : propName.substring(1);
+				var template = _ruleTemplates.get(name);
 				if (template != null) {
-					var lines = new ExpressionIterator(StringTools.replace(template.content, "@", name.substring(1) + "__"), true);
+					var i = 0;
+					if (pOpen >= 0 && pClose > pOpen) {
+						var params = propName.substring(pOpen + 1, pClose).split(",");
+						while (i < params.length && i < template.params.length) {
+							res.var_part += template.params[i].name + " = " + params[i] + ";\n";
+							i++;
+						}
+					}
+					while (i < template.params.length) {
+						var param = template.params[i];
+						if (param.def != "") {
+							res.var_part += param.name + " = " + param.def + ";\n";
+						}
+						i++;
+					}					
+					var lines = new RuleIterator(StringTools.replace(template.content, "@", name + "__"), true);
 					
 					for (line in lines) {
 						res.code_part += codeStyleData(line).code_part;
@@ -138,7 +107,7 @@ class Macros {
 					//trace(res.var_part + res.code_part);
 				} else {
 					trace('warning template $propName not found !');
-					//trace(ruleTemplates);
+					//trace(_ruleTemplates);
 				}
 			} else if (styleData.content.length > 0) {
 				var propValue = styleData.content;
@@ -190,7 +159,7 @@ class Macros {
 		var code: CodePart = { var_part: "", code_part: ""};
 		
 		code.code_part += "\tvar style:haxe.ui.toolkit.style.Style = new haxe.ui.toolkit.style.Style({\n";
-		var lines = new ExpressionIterator(style, true);
+		var lines = new RuleIterator(style, true);
 		for (styleData in lines) {
 			var x = codeStyleData(styleData);
 			code.code_part += x.code_part;
@@ -216,7 +185,7 @@ class Macros {
 			if(!sys.FileSystem.exists(dir) || !sys.FileSystem.isDirectory(dir)) {
 				continue;
 			}
-			trace(dir);
+			//trace(dir);
 			var files:Array<String> = sys.FileSystem.readDirectory(dir);
 			if (files != null) {
 				for (file in files) {
@@ -349,102 +318,3 @@ class Macros {
 }
 
 
-typedef ExpressionIteratorResult = {
-	prefix: String,
-	content: String,
-	delim: String,
-}
-
-private class ExpressionIterator {
-	
-	private var _ns: Int;
-	private var _ne: Int;
-	private var _ndelim: Int;
-	private var _content: String;
-	private var _expectdd: Bool;
-	
-		
-	public function new(content: String, expectDoubleDot: Bool) {
-		_content = content;
-		_ns = 0;
-		_ne = 0;
-		_expectdd = expectDoubleDot;
-	}
-	
-	private function parseEndOf(start: Int): Int {
-		var first = start;
-		if (first == -1) return -1;
-		var n = first + 1;
-		var nClose: Int = _content.indexOf("}", n);
-		var nOpen: Int = _content.indexOf("{", n);
-		var xOpen = 0;
-		function info(l) {} // trace( { l:l, c: nClose, o: nOpen, x: xOpen, n: n } );
-		do {
-			while (nOpen != -1 && nOpen < nClose) {
-				xOpen ++;
-				n = nOpen + 1;
-				nOpen = _content.indexOf("{", n);
-			}
-			while (nClose != -1 && (nClose < nOpen || nOpen == -1)) {
-				xOpen --;
-				if (xOpen < 0) {
-					return nClose;
-				}
-				n = nClose + 1;
-				nClose = _content.indexOf("}", n);
-			}
-		} while (nOpen != -1 && nClose != -1);
-		return -1;
-	}
-
-	public function hasNext(): Bool {
-		if (_ns != -1) {
-			var nd = _expectdd ? _content.indexOf(":", _ns) : -1;
-			var nc = _expectdd ? _content.indexOf(";", _ns) : -1;
-			var np = _content.indexOf("{", _ns);
-			if (nd != -1 && (nd < np || np == -1)) {
-				_ndelim = nd;
-				//var nc = _content.indexOf(";", nd);
-				if (nc == -1) {
-					_ns = -1;
-				} else if (nc < nd) {
-					_ne = nc;
-					_ndelim = nc;
-				} else if (nc < np || np == -1) {
-					_ne = nc;
-				} else {
-					do {
-						var npe = parseEndOf(np);
-						if (npe != -1) {
-							nc = _content.indexOf(";", npe);
-							np = _content.indexOf("{", npe);
-						}
-					} while (nc != -1 && np != -1 && nc > np);
-					_ne = nc;
-				}
-			} else if (np != -1 && (np < nd || nd == -1)) {
-				_ndelim = np;
-				_ne = parseEndOf(np);
-			} else if (nc != -1) {
-				_ndelim = nc;
-				_ne = nc;
-			} else {
-				_ns = -1;
-			}
-		}
-		return _ns != -1 ;
-	}
-	
-	public function next() : ExpressionIteratorResult {
-		var res: ExpressionIteratorResult = { prefix: StringTools.trim(_content.substring(_ns, _ndelim)), content: null, delim: _content.charAt(_ndelim) };
-		if (_ne != -1) {
-			res.content = StringTools.trim(_content.substr(_ndelim + 1, _ne - _ndelim - 1));
-			_ns = _ne + 1;
-		} else {
-			res.content = StringTools.trim(_content.substring(_ndelim + 1));
-			_ns = -1;
-		}
-		return res;
-	}
-	
-}
