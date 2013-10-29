@@ -18,17 +18,18 @@ class RuleTemplateParser
 
 	static public function parse(line: RuleIteratorResult): RuleTemplate {
 		var template: RuleTemplate = {
-			name: line.prefix,
+			name: null, //"@border(@size=1)", //line.prefix,
 			content: line.content,
 			params: new Array(),
 		}
-		if ( template.name.charAt(0) == "@" ) template.name = template.name.substring(1);
-		var pOpen = template.name.indexOf("(");
+		var name = line.prefix;
+		if ( name.charAt(0) == "@" ) name = name.substring(1);
+		var pOpen = name.indexOf("(");
 		if (pOpen >= 0) {
-			var pClose = template.name.lastIndexOf(")");
+			var pClose = name.lastIndexOf(")");
 			if (pClose > pOpen) {
-				var params = template.name.substring(pOpen + 1, pClose).split(",");
-				template.name = template.name.substring(0, pOpen);
+				var params = name.substring(pOpen + 1, pClose).split(",");
+				name = name.substring(0, pOpen);
 				for (p in params) {
 					var pos = p.indexOf("=");
 					var def = "";
@@ -38,14 +39,15 @@ class RuleTemplateParser
 						def = p.substring(pos + 1);
 					}
 					var vname = (pos >= 0) ? p.substring(0, pos): p;
-					vname = template.name + "__" + (vname.charAt(0) == "@" ? vname.substring(1): vname);
+					vname = name + "__" + (vname.charAt(0) == "@" ? vname.substring(1): vname);
 					template.params.push({name: vname, def: def});
 				}
 			} else {
-				trace('warning $template.name has open parenthesis');
-				template.name = template.name.substring(0, pOpen);
+				trace('warning $name has open parenthesis');
+				name = name.substring(0, pOpen);
 			}
 		}		
+		template.name = name;
 		return template;
 	}
 	
