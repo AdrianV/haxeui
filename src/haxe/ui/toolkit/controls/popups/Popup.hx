@@ -128,6 +128,15 @@ class Popup extends VBox implements IDraggable {
 	}
 
 	//******************************************************************************************
+	// Getters / Setters
+	//******************************************************************************************
+	public var content(get, null):PopupContent;
+	
+	private function get_content():PopupContent {
+		return _content;
+	}
+	
+	//******************************************************************************************
 	// Helpers
 	//******************************************************************************************
 	private function addStandardButton(v:Int):Void {
@@ -174,7 +183,9 @@ class Popup extends VBox implements IDraggable {
 	}
 	
 	public function clickButton(button:Int):Void {
-		PopupManager.instance.hidePopup(this);
+		if (_content.onButtonClicked(button) == true) {
+			PopupManager.instance.hidePopup(this);
+		}
 		if (_fn != null) {
 			_fn(button);
 		}

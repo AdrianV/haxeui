@@ -4,7 +4,7 @@ import flash.events.Event;
 import haxe.ui.toolkit.core.interfaces.IDisplayObject;
 
 class UIEvent extends Event {
-	public static inline var PREFIX:String = "hui_";
+	public static inline var PREFIX:String = "haxeui_";
 	
 	public static inline var INIT:String = PREFIX + "init";
 	public static inline var RESIZE:String = PREFIX + "resize";
@@ -26,7 +26,10 @@ class UIEvent extends Event {
 	public static inline var ACTIVATE:String = PREFIX + "activate";
 	public static inline var DEACTIVATE:String = PREFIX + "deactivate";
 	
+	public static inline var GLYPH_CLICK:String = PREFIX + "glyphClick"; // for button images
+	
 	public var displayObject(default, default):IDisplayObject;
+	public var data(default, default):Dynamic;
 	
 	public function new(type:String, bubbles:Bool = false, cancelable:Bool = false) {
 		super(type, bubbles, cancelable);

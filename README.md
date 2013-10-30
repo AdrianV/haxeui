@@ -5,13 +5,25 @@ Cross platfrom Haxe/OpenFL set of styleable application centric rich UI componen
 <img src="https://raw.github.com/ianharrigan/haxeui-test-app/master/docs/screenshots/main.jpg" />
 <img src="https://raw.github.com/ianharrigan/haxeui-test-app/master/docs/screenshots/extended.jpg" />
 
-<a href="https://github.com/ianharrigan/haxeui-test-app/blob/master/docs/demo/haxeuitestapp.swf?raw=true">Compiled SWF demo</a> (May be out of date)
+<b>Demos</b> (May be out of date): 
+<a href="https://github.com/ianharrigan/haxeui-test-app/blob/master/docs/demo/haxeuitestapp.swf?raw=true">SWF</a> | 
+<a href="https://github.com/ianharrigan/haxeui-test-app/blob/master/docs/demo/windows/haxeuitestapp.zip?raw=true">Windows</a> | 
+<a href="https://github.com/ianharrigan/haxeui-test-app/blob/master/docs/demo/neko/haxeuitestapp.zip?raw=true">Neko</a> | 
+<a href="https://github.com/ianharrigan/haxeui-test-app/blob/master/docs/demo/android/haxeuitestapp.apk?raw=true">Android</a> |
+<a href="https://github.com/ianharrigan/haxeui-test-app/blob/master/docs/demo/air/haxeuitestapp.air?raw=true">AIR</a>
 
-<a href="https://github.com/ianharrigan/haxeui-test-app">Test App</a> (Used in demo/screenshots)
+Adobe AIR  note: Installer will not install from mounted/network drives.
 
-<a href="https://github.com/ianharrigan/hui-irc-threadtest">IRC client test app</a>
+Documentation
+-------------------------
+<a href="http://haxeui.org/docs/api">API</a> (Incomplete)
 
-<a href="https://github.com/ianharrigan/haxeui/tree/master/samples">Samples</a>
+Projects
+-------------------------
+ - <a href="https://github.com/ianharrigan/haxeui-test-app">Test App</a> (Used in demo/screenshots)
+ - <a href="https://github.com/ianharrigan/haxeui/tree/master/samples">Samples</a>
+ - <a href="https://github.com/ianharrigan/hui-irc-threadtest">IRC client test app</a>
+ - <a href="https://github.com/ianharrigan/haxe-pad">HaxePad</a>
 
 Instructions
 -------------------------
@@ -50,7 +62,6 @@ Note: haxeui comes with some styles ready for use, if no styles are added a defa
 Components
 -------------------------
 General components
-
 - Button
 - Check box
 - Image
@@ -66,12 +77,10 @@ General components
 - Menus
 
 Extended components
-
  - Code editor (supports basic syntax highlighting)
  - RTF edtior (preliminary, only fully functional in flash due to neko/cpp limitations)
 
 Layout, position and containment components
-
 - Accordion
 - Grid
 - HBox
@@ -117,7 +126,7 @@ Licence
     The above copyright notice and this permission notice shall be included
     in all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    THE SOFTWARE IS PROVIDED ?AS IS?, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
     THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
