@@ -94,7 +94,12 @@ class StyleParser {
 				return;
 			}
 			if (propValue.charAt(0) == "#") propValue = "0x" + propValue.substr(1, propValue.length - 1);
-			Reflect.setProperty(style, propName, _interp.execute(_parser.parseString(propValue)));
+			try {
+				Reflect.setProperty(style, propName, _interp.execute(_parser.parseString(propValue)));
+			} catch (e: Dynamic) {
+				//trace( { n:propName, v: propValue } );
+				Reflect.setProperty(style, propName, propValue); // try to set property value as string
+			}
 		}
 		for (line in lines) {
 			setStyleProperty(line.prefix, line.content);
