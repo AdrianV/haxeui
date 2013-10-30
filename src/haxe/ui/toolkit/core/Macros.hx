@@ -1,5 +1,6 @@
 package haxe.ui.toolkit.core;
 
+//import flash.system.Capabilities;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.ui.toolkit.style.RuleIterator;
@@ -58,6 +59,8 @@ class Macros {
 		
 		var contents:String = sys.io.File.getContent(resourcePath);
 		var code:String = "function() {\n";
+		code += 'var screen = { dpi: flash.system.Capabilities.screenDPI, resolutionX: flash.system.Capabilities.screenResolutionX, resolutionY: flash.system.Capabilities.screenResolutionY };\n';
+
 		var rules = new RuleIterator(contents, false);
 		for (rule in rules) {
 			if (rule.prefix != "") {

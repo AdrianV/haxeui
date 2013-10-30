@@ -2,6 +2,7 @@ package haxe.ui.toolkit.style;
 
 import flash.geom.Rectangle;
 import flash.Lib;
+import flash.system.Capabilities;
 import haxe.ui.toolkit.util.FilterParser;
 import hscript.Interp;
 import hscript.Parser;
@@ -115,6 +116,10 @@ class StyleParser {
 		var styles = new Styles();
 		_parser = new Parser();
 		_interp = new Interp();
+		_interp.variables.set("screen", { dpi: Capabilities.screenDPI, 
+			resolutionX: Capabilities.screenResolutionX,
+			resolutionY: Capabilities.screenResolutionY,
+		} );
 		_ruleTemplates = new Map();
 		var rules = new RuleIterator(styleString, false);
 		for (rule in rules) {
