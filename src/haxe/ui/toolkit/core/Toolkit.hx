@@ -13,6 +13,7 @@ import haxe.ui.toolkit.core.xml.UIProcessor;
 import haxe.ui.toolkit.data.DataManager;
 import haxe.ui.toolkit.data.IDataSource;
 import haxe.ui.toolkit.hscript.ClientWrapper;
+import haxe.ui.toolkit.hscript.ScriptManager;
 import haxe.ui.toolkit.resources.ResourceManager;
 import haxe.ui.toolkit.style.DefaultStyles;
 import haxe.ui.toolkit.style.StyleManager;
@@ -23,7 +24,7 @@ import haxe.ui.toolkit.util.TypeParser;
 class Toolkit {
 	private static var _instance:Toolkit;
 	public static var instance(get, null):Toolkit;
-	public static function get_instance():Toolkit {
+	private static function get_instance():Toolkit {
 		if (_instance == null) {
 			Lib.current.stage.align = flash.display.StageAlign.TOP_LEFT;
 			Lib.current.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
@@ -60,15 +61,19 @@ class Toolkit {
 	// Processes a chunk of xml, return values depend on what comes in, could return IDisplayObject, IDataSource
 	// processing means constructing ui, registering data sources
 	//******************************************************************************************
-	public static function processXml(xml:Xml):Dynamic {
+	public static function processXmlResource<T>(resourceId:String):Null<T> {
+		return processXml(ResourceManager.instance.getXML(resourceId));
+	}
+	
+	public static function processXml<T>(xml:Xml):Null<T> {
 		var result:Dynamic = null;
 		
 		result = processXmlNode(xml.firstElement());
 		
-		return result;
+		return cast result;
 	}
 	
-	private static function processXmlNode(node:Xml):Dynamic {
+	private static function processXmlNode<T>(node:Xml):Null<T> {
 		if (node == null) {
 			return null;
 		}
@@ -105,6 +110,18 @@ class Toolkit {
 						return processXml(importXml);
 					}
 				}
+			} else if (nodeName == "script") {
+				var scriptResource = node.get("resource");
+				var scriptData:String = "";
+				if (scriptResource != null) {
+					scriptData += ResourceManager.instance.getText(scriptResource);
+				}
+				var scriptNodeData:String = node.firstChild().nodeValue;
+				if (scriptNodeData != null) {
+					scriptNodeData = StringTools.trim(scriptNodeData);
+					scriptData += "\n\n" + scriptNodeData;
+				}
+				ScriptManager.instance.addScript(scriptData);
 			}
 		} else {
 			var p:IXMLProcessor = null;
@@ -134,7 +151,7 @@ class Toolkit {
 			}
 		}
 		
-		return result;
+		return cast result;
 	}
 	
 	//******************************************************************************************
@@ -199,8 +216,16 @@ class Toolkit {
 		return root;
 	}
 	
-	public static function openPopup(fn:Root->Void = null):Root {
-		var root:Root = RootManager.instance.createRoot( { x: 20, y: 20, id: "popupRoot" }, fn);
+	public static function openPopup(options:Dynamic = null, fn:Root->Void = null):Root {
+		if (options == null) {
+			options = { };
+		}
+		
+		options.x = (options.x != null) ? options.x : 20;
+		options.y = (options.y != null) ? options.y : 20;
+		options.styleName = (options.styleName != null) ? options.styleName : "popup";
+		
+		var root:Root = RootManager.instance.createRoot(options, fn);
 		return root;
 	}
 }
