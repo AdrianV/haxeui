@@ -1,4 +1,4 @@
-package haxe.ui.toolkit.style;
+package haxe.ui.toolkit.styletemplates;
 
 import flash.geom.Rectangle;
 import flash.Lib;
@@ -6,9 +6,11 @@ import flash.system.Capabilities;
 import haxe.ui.toolkit.util.FilterParser;
 import hscript.Interp;
 import hscript.Parser;
-import haxe.ui.toolkit.style.RuleTemplateParser;
+import haxe.ui.toolkit.style.Style;
+import haxe.ui.toolkit.style.Styles;
+import haxe.ui.toolkit.styletemplates.RuleTemplateParser;
 
-class StyleParser {
+class TemplateStyleParser {
 	
 	private static var _parser: Parser;
 	private static var _interp: Interp;

@@ -1,4 +1,4 @@
-package haxe.ui.toolkit.style;
+package haxe.ui.toolkit.styletemplates;
 
 /**
  * ...

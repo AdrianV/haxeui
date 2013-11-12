@@ -1,6 +1,6 @@
-package haxe.ui.toolkit.style;
+package haxe.ui.toolkit.styletemplates;
 
-import haxe.ui.toolkit.style.RuleIterator;
+import haxe.ui.toolkit.styletemplates.RuleIterator;
 
 typedef RuleTemplateParam = {
 	name: String,
