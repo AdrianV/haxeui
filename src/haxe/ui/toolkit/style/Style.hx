@@ -39,6 +39,7 @@ class Style {
 	private var _fontName:String;
 	private var _fontSize:Float = -1;
 	private var _fontScale:Float = -1;
+	private var _fontEmbedded:Float = -1;
 	private var _iconPosition:String;
 	private var _labelPosition:String;
 	private var _icon:String;
@@ -78,6 +79,7 @@ class Style {
 	public var fontName(get, set):String;
 	public var fontSize(get, set):Float;
 	public var fontScale(get, set):Float;
+	public var fontEmbedded(get, set):Bool;
 	public var iconPosition(get, set):String;
 	public var labelPosition(get, set):String;
 	public var icon(get, set):String;
@@ -609,6 +611,22 @@ class Style {
 		return value;
 	}
 	
+	private function get_fontEmbedded():Bool {
+		if (hasDynamicValue("fontEmbedded")) {
+			return getDynamicValue("fontEmbedded");
+		}
+		if (_fontEmbedded == -1) {
+			return false;
+		}
+		return _fontEmbedded == 1;
+	}
+	
+	private function set_fontEmbedded(value:Bool):Bool {
+		_fontEmbedded = value ? 1 : 0;
+		apply();
+		return value;
+	}
+	
 	private function get_iconPosition():String {
 		if (hasDynamicValue("iconPosition")) {
 			return getDynamicValue("iconPosition");
@@ -798,6 +816,7 @@ class Style {
 		if (with._fontName != null) this._fontName = with._fontName;
 		if (with._fontSize != -1) this._fontSize = with._fontSize;
 		if (with._fontScale != -1) this._fontScale = with._fontScale;
+		if (with._fontEmbedded != -1) this._fontEmbedded = with._fontEmbedded;
 		if (with._iconPosition != null) this._iconPosition = with._iconPosition;
 		if (with._labelPosition != null) this._labelPosition = with._labelPosition;
 		if (with._icon != null) this._icon = with._icon;
