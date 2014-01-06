@@ -1,5 +1,6 @@
 package haxe.ui.toolkit.containers;
 
+import flash.display.DisplayObject;
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -26,7 +27,11 @@ class ScrollView extends StateComponent {
 	
 	private var _eventTarget:Sprite;
 	private var _downPos:Point;
-	private var _scrollSensitivity:Int = 1;
+	#if mobile
+	private var _scrollSensitivity:Int = 0;
+	#else
+	private var _scrollSensitivity:Int = 0;
+	#end
 	
 	private var _autoHideScrolls:Bool = false;
 	
@@ -233,6 +238,15 @@ class ScrollView extends StateComponent {
 		if (_downPos != null) {
 			var ypos:Float = event.stageY - _downPos.y;
 			var xpos:Float = event.stageX - _downPos.x;
+			
+			var target:DisplayObject =  event.target;
+			while (target != null && Std.is(target, DisplayObject))
+			{
+				xpos /= target.scaleX;
+				ypos /= target.scaleY;
+				target = target.parent;
+			}
+			
 			if (Math.abs(xpos) >= _scrollSensitivity  || Math.abs(ypos) >= _scrollSensitivity) {
 				_eventTarget.visible = true;
 				var content:IDisplayObject = getChildAt(0); // assume first child is content
@@ -294,6 +308,7 @@ class ScrollView extends StateComponent {
 					_hscroll.addEventListener(Event.CHANGE, _onHScrollChange);
 					_hscroll.visible = false;
 					addChild(_hscroll);
+					invalidateLayout = true;
 				}
 				
 				_hscroll.max = content.width - layout.usableWidth;
@@ -332,6 +347,7 @@ class ScrollView extends StateComponent {
 					_vscroll.addEventListener(Event.CHANGE, _onVScrollChange);
 					_vscroll.visible = false;
 					addChild(_vscroll);
+					invalidateLayout = true;
 				}
 				
 				_vscroll.max = content.height - layout.usableHeight;

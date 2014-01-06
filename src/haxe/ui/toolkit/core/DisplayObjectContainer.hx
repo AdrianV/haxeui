@@ -63,20 +63,32 @@ class DisplayObjectContainer extends DisplayObject implements IDisplayObjectCont
 	public var autoSize(get, set):Bool;
 	
 	private function get_numChildren():Int {
-		return _children.length;
+		var arr = _children;
+		#if html5
+		if (_childrenToAdd != null) {
+			arr = arr.concat(_childrenToAdd);
+		}
+		#end
+		return arr.length;
 	}
 	
 	private function get_children():Array<IDisplayObject> {
-		return _children;
+		var arr = _children;
+		#if html5
+		if (_childrenToAdd != null) {
+			arr = arr.concat(_childrenToAdd);
+		}
+		#end
+		return arr;
 	}
 	
 	public function indexOfChild(child:IDisplayObject):Int {
-		var index:Int = std.Lambda.indexOf(_children, child);
+		var index:Int = std.Lambda.indexOf(children, child);
 		return index;
 	}
 	
 	public function getChildAt(index:Int):IDisplayObject {
-		return _children[index];
+		return children[index];
 	}
 	
 	#if html5
@@ -153,6 +165,14 @@ class DisplayObjectContainer extends DisplayObject implements IDisplayObjectCont
 			}
 			invalidate(InvalidationFlag.LAYOUT);
 		}
+		#if html5
+		if (_childrenToAdd != null) {
+			var success = _childrenToAdd.remove(child);
+			if (dispose && success) {
+				child.dispose();
+			}
+		}
+		#end
 		return child;
 	}
 	
@@ -161,16 +181,28 @@ class DisplayObjectContainer extends DisplayObject implements IDisplayObjectCont
 	}
 	
 	public function removeAllChildren():Void {
-		while (_children.length > 0) {
-			var child:IDisplayObject = _children[0];
+		var arr = children;
+		while (arr.length > 0) {
+			var child:IDisplayObject = arr[0];
 			removeChild(child);
 		}
+		while (sprite.numChildren > 0) {
+			sprite.removeChildAt(0);
+		}
+		#if html5
+		_childrenToAdd = null;
+		#end
 	}
 	
 	public function contains(child:IDisplayObject):Bool {
 		if (child == null) {
 			return false;
 		}
+		#if html5
+		if (_childrenToAdd != null) {
+			return std.Lambda.has(_childrenToAdd, child);
+		}
+		#end
 
 		return sprite.contains(child.sprite);
 	}
@@ -179,6 +211,12 @@ class DisplayObjectContainer extends DisplayObject implements IDisplayObjectCont
 		if (child != null) {
 			sprite.setChildIndex(child.sprite, index);
 		}
+		#if html5
+		if (_childrenToAdd != null) {
+			_childrenToAdd.remove(child);
+			_childrenToAdd.insert(index, child);
+		}
+		#end
 	}
 	
 	public function findChildAs<T>(type:Class<T>):Null<T> {
@@ -192,12 +230,24 @@ class DisplayObjectContainer extends DisplayObject implements IDisplayObjectCont
 		return cast match;
 	}
 	
-	public function findChild<T>(id:String, type:Class<T> = null):Null<T> {
+	public function findChild<T>(id:String, type:Class<T> = null, recursive:Bool = false):Null<T> {
 		var match:Component = null;
 		for (child in children) {
 			if (child.id == id) {
 				match = cast child;
 				break;
+			}
+		}
+		if (match == null && recursive == true) {
+			for (child in children) {
+				if (Std.is(child, IDisplayObjectContainer)) {
+					var c:IDisplayObjectContainer = cast(child, IDisplayObjectContainer);
+					var temp:Component = cast c.findChild(id, type, recursive);
+					if (temp != null) {
+						match = temp;
+						break;
+					}
+				}
 			}
 		}
 		return cast match;
