@@ -2,6 +2,7 @@ package haxe.ui.toolkit.controls;
 
 import flash.events.MouseEvent;
 import haxe.ui.toolkit.core.interfaces.IFocusable;
+import haxe.ui.toolkit.core.interfaces.InvalidationFlag;
 import haxe.ui.toolkit.core.Screen;
 import haxe.ui.toolkit.core.StateComponent;
 import haxe.ui.toolkit.events.UIEvent;
@@ -111,7 +112,7 @@ class Button extends StateComponent implements IFocusable {
 		addEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
 		addEventListener(MouseEvent.CLICK, _onMouseClick);
 		
-		applyStyle();
+		//applyStyle();
 	}
 	
 	private override function set_disabled(value:Bool):Bool {
@@ -339,6 +340,7 @@ class Button extends StateComponent implements IFocusable {
 			
 			if (_style.iconPosition != null) {
 				cast(_layout, ButtonLayout).iconPosition = _style.iconPosition;
+				invalidate(InvalidationFlag.LAYOUT);
 			}
 
 			if (_style.labelPosition != null) {
