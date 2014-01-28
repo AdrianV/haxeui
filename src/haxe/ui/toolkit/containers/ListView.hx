@@ -52,6 +52,7 @@ class ListView extends ScrollView implements IDataComponent {
 		_dataSource.open();
 		
 		syncUI();
+		checkScrolls();
 	}
 
 	public override function dispose():Void {
@@ -338,9 +339,11 @@ class ListView extends ScrollView implements IDataComponent {
 		if (_ready == false) {
 			return value;
 		}
-		var item:ListViewItem = cast(_content.getChildAt(value), ListViewItem);
-		if (item != null) {
-			handleListSelection(item, null, false);
+		if (_content.getChildAt(value) != null) {
+			var item:ListViewItem = cast(_content.getChildAt(value), ListViewItem);
+			if (item != null) {
+				handleListSelection(item, null, false);
+			}
 		}
 		return value;
 	}
