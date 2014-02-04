@@ -53,7 +53,7 @@ class TemplateStyleParser {
 						}
 						i++;
 					}					
-					var lines = new RuleIterator(StringTools.replace(template.content, "@", template.name + "__"), true);
+					var lines = new RuleIterator(StringTools.replace(template.content, "$", template.name + "__"), true);
 					
 					for (line in lines) {
 						setStyleProperty(line.prefix, line.content);

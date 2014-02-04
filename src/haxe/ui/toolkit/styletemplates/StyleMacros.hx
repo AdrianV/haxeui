@@ -46,7 +46,7 @@ class StyleMacros {
 	macro public static function addStyleSheet(resourcePath:String):Expr {
 		_ruleTemplates = new Map();
 		_ruleVars = new Map();
-		if (sys.FileSystem.exists(resourcePath) == false) {
+		if ( ! sys.FileSystem.exists(resourcePath) ) {
 			var paths:Array<String> = Context.getClassPath();
 			for (path in paths) {
 				path = path + "/" + resourcePath;
@@ -56,7 +56,7 @@ class StyleMacros {
 				}
 			}
 		}
-		
+		trace(resourcePath);
 		var contents:String = sys.io.File.getContent(resourcePath);
 		var code:String = "function() {\n";
 		code += 'var screen = { dpi: flash.system.Capabilities.screenDPI, resolutionX: flash.system.Capabilities.screenResolutionX, resolutionY: flash.system.Capabilities.screenResolutionY };\n';
@@ -102,9 +102,11 @@ class StyleMacros {
 						}
 						i++;
 					}					
-					var lines = new RuleIterator(StringTools.replace(template.content, "@", name + "__"), true);
+					//trace(template.content);
+					var lines = new RuleIterator(StringTools.replace(template.content, "$", name + "__"), true);
 					
 					for (line in lines) {
+						
 						res.code_part += codeStyleData(line).code_part;
 					}
 					//trace(res.var_part + res.code_part);
