@@ -999,17 +999,6 @@ ListPopupContent ListView {
 	borderSize: 0;
 }
 
-PanelList {
-	spacingX: 0;
-	spacingY: 0;
-	padding: 0;
-}
-
-PanelList VBox, PanelList HBox, PanelList Grid {
-	padding: 5;
-	spacing: 5;
-}
-
 
 Accordion {
 	spacingX: 0;
@@ -1017,12 +1006,12 @@ Accordion {
 	padding: 0;
 }
 
-Accordion VBox, Accordion HBox, Accordion Grid {
+Accordion .page {
 	padding: 5;
 	spacing: 5;
 }
 
-AccordionButton {
+Button.expandable {
 	paddingLeft: 8;
 	paddingTop: 5;
 	paddingBottom: 5;
@@ -1041,19 +1030,30 @@ AccordionButton {
 	icon: "styles/gradient/arrow_right2.png";
 }
 
-AccordionButton:over {
+Button.expandable:over {
 	backgroundColor: 0x819bcb;
 	backgroundColorGradientEnd: 0x536f9d;
 	color: 0xFFFFFF;
 	borderColor: 0x495267;
 }
 
-AccordionButton:down {
+Button.expandable:down {
 	backgroundColor: 0x606c88;
 	backgroundColorGradientEnd: 0x3f4c6b;
 	color: 0xFFFFFF;
 	borderColor: 0x495267;
 	icon: "styles/gradient/arrow_down.png";
+}
+
+ExpandablePanel {
+	spacingX: 0;
+	spacingY: 0;
+	padding: 0;
+}
+
+ExpandablePanel #content {
+	padding: 5;
+	spacing: 5;
 }
 
 RTFView {

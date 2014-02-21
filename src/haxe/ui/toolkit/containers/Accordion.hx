@@ -10,6 +10,7 @@ import haxe.ui.toolkit.core.interfaces.IDisplayObject;
 import haxe.ui.toolkit.core.interfaces.IDisplayObjectContainer;
 import haxe.ui.toolkit.core.interfaces.IEventDispatcher;
 import haxe.ui.toolkit.core.interfaces.InvalidationFlag;
+import haxe.ui.toolkit.core.StyleableDisplayObject;
 import haxe.ui.toolkit.core.Toolkit;
 import haxe.ui.toolkit.events.UIEvent;
 import motion.Actuate;
@@ -22,13 +23,10 @@ class Accordion extends VBox {
 	private var _panels:Array<IDisplayObject>;
 	private var _buttons:Array<AccordionButton>;
 	private var _selectedIndex:Int = -1;
-	/** Whether to hide other panels when a new one is expanded */
-	private var _hideUnselected:Bool;
 	
 	public function new() {
 		super();
 		_autoSize = false;
-		_hideUnselected = true;
 		_panels = new Array<IDisplayObject>();
 		_buttons = new Array<AccordionButton>();
 	}
@@ -40,7 +38,9 @@ class Accordion extends VBox {
 		super.initialize();
 		
 		if (_selectedIndex != -1) {
-			showPage(_selectedIndex);
+			var cachedIndex:Int = _selectedIndex;
+			_selectedIndex = -1;
+			showPage(cachedIndex);
 		}
 	}
 	
@@ -52,34 +52,30 @@ class Accordion extends VBox {
 		if (Std.is(child, AccordionButton)) {
 			r = super.addChild(child);
 		} else {
-			
-			if (autoSize == false) {
-				
-				/* If autosize is set to false the added panels autosize will also be set to false
-				 * and will fit the accordion height and width
-				 * 
-				 * If autosize is set to true, the accordion will fit the panels width and height */
-				if (Std.is(child, IDisplayObjectContainer)) {
-					cast(child, IDisplayObjectContainer).autoSize = false;
-				}
-				
-				child.percentHeight = 100;
-				child.percentWidth = 100;
+			if (Std.is(child, IDisplayObjectContainer)) {
+				cast(child, IDisplayObjectContainer).autoSize = false;
 			}
-			
+			if (Std.is(child, StyleableDisplayObject)) {
+				cast(child, StyleableDisplayObject).styleName = "page";
+			}
+			child.percentHeight = 100;
+			child.percentWidth = 100;
 			_panels.push(child);
 			
 			var button:AccordionButton = new AccordionButton();
+			button.styleName = "expandable";
 			if (Std.is(child, Component)) {
 				button.text = cast(child, Component).text;
 			}
 			button.percentWidth = 100;
 			button.toggle = true;
-			button.allowSelection = false;
-			button.addEventListener(MouseEvent.CLICK, buildMouseClickFunction(_panels.length - 1));
+			button.selected = false;
+			button.addEventListener(UIEvent.CHANGE, buildMouseClickFunction(_panels.length - 1));
 			
 			addChild(button);
 			_buttons.push(button);
+			child.visible = false;
+			super.addChild(child);
 		}
 		return r;
 	}
@@ -95,7 +91,7 @@ class Accordion extends VBox {
 	
 	private function set_selectedIndex(value:Int):Int {
 		if (_ready == true) {
-			showPage(value);
+			_buttons[value].selected = true;
 		} else {
 			_selectedIndex = value;
 		}
@@ -107,6 +103,11 @@ class Accordion extends VBox {
 	//******************************************************************************************
 	public var selectedButton(get, null):Button;
 	private function get_selectedButton():Button {
+		
+		if (_selectedIndex == -1) {
+			return null;
+		}
+		
 		return getButton(_selectedIndex);
 	}
 
@@ -114,11 +115,20 @@ class Accordion extends VBox {
 		return _buttons[index];
 	}
 	
-	private function showPage(index:Int):Void {
+	public function showPage(index:Int):Void {
+		var button:AccordionButton = _buttons[index];
+		button.selected = true;
+	}
+	
+	private function buildMouseClickFunction(index:Int) {
+		return function(event:UIEvent) { mouseClickButton(index); };
+	}
+	
+	private function mouseClickButton(index:Int):Void {
 		var button:AccordionButton = _buttons[index];
 		for (b in _buttons) {
 			if (b == button) {
-				if (b.selected == false) {
+				if (b.selected == true) {
 					showPanel(index);
 				} else {
 					hidePanel(index);
@@ -129,28 +139,36 @@ class Accordion extends VBox {
 		dispatchEvent(new UIEvent(UIEvent.CHANGE));
 	}
 	
-	private function buildMouseClickFunction(index:Int) {
-		return function(event:MouseEvent) { mouseClickButton(index); };
-	}
-	
-	private function mouseClickButton(index:Int):Void {
-		showPage(index);
-	}
-	
 	private function showPanel(index:Int):Void {
 		var button:AccordionButton = _buttons[index];
-		var buttonChildIndex:Int = indexOfChild(button);
 		var panel:IDisplayObject = _panels[index];
 		
 		if (panel != null) {
-			panel.visible = false;
-			if (panel.ready == false) {
-				cast(panel, IEventDispatcher).addEventListener(UIEvent.INIT, _onPanelAdded);
-			} else {
-				cast(panel, IEventDispatcher).addEventListener(UIEvent.ADDED_TO_STAGE, _onPanelAdded);
+			panel.visible = true;
+			//panel.percentHeight = 100;
+			
+			var transition:String = Toolkit.getTransitionForClass(Accordion);
+			
+			var c = cast(panel, Component);
+			
+			if (transition == "fade") { // fade in panel.
+				c.sprite.alpha = 0;
+				Actuate.tween(c.sprite, .2, { alpha: 1 }, true).ease(Linear.easeNone);
 			}
-			super.addChildAt(panel, buttonChildIndex + 1);
-			button.selected = true;
+			
+			if (selectedButton != null) {
+				selectedButton.selected = false; // hides current panel.
+			} else if (transition == "slide") { // slide in panel.
+				panel.percentHeight = -1;
+				c.clipHeight = 0;
+				c.height = 0;
+				Actuate.tween(c, .2, { height: layout.usableHeight, clipHeight: layout.usableHeight }, true).ease(Linear.easeNone)
+					   .onComplete(function () {
+						   c.clearClip();
+						   c.percentHeight = 100;
+					   });
+			}
+			
 			_selectedIndex = index;
 		}
 	}
@@ -159,125 +177,41 @@ class Accordion extends VBox {
 		var button:AccordionButton = _buttons[index];
 		var buttonChildIndex:Int = indexOfChild(button);
 		var panel:IDisplayObject = _panels[index];
+		
 		if (panel != null) {
 			var transition:String = Toolkit.getTransitionForClass(Accordion);
 			if (transition == "slide") {
 				var c:Component = cast(panel, Component);
 				c.percentHeight = -1;
 				c.clipHeight = c.height;
-				c.autoSize = false;
 				Actuate.tween(c, .2, { height: 0, clipHeight: 0 }, true).ease(Linear.easeNone).onComplete(function() {
 					c.clearClip();
-					c.autoSize = autoSize;
-					//if (autoSize == false) {
-						panel.percentHeight = 100;
-					//}
-					invalidate(InvalidationFlag.SIZE);
-					button.selected = false;
-					removeChild(panel, false);
+					panel.percentHeight = 100;
+					unselectButton(button);
+					panel.visible = false;
 				});
 			} else if (transition == "fade") {
-				removeChild(panel, false);
-				button.selected = false;
+				unselectButton(button);
+				panel.visible = false;
 			} else {
-				removeChild(panel, false);
-				button.selected = false;
+				unselectButton(button);
+				panel.visible = false;
 			}
-		}
-	}
-	
-	private function showPanelObject(panel:IDisplayObject):Void {
-		var panelIndex:Int = Lambda.indexOf(_panels, panel);
-		var button:Button = _buttons[panelIndex];
-		var panelToHide:Component = null;
-		var buttonToHide:AccordionButton = null;
-
-		if (_hideUnselected) {
-			for (b in _buttons) {
-				if (b != button && b.selected == true) {
-					buttonToHide = b;
-					var tempIndex:Int = Lambda.indexOf(_buttons, b);
-					panelToHide = cast(_panels[tempIndex], Component);
-					break;
-				}
-			}
-		}
-		
-		var transition:String = Toolkit.getTransitionForClass(Accordion);
-		if (transition == "slide") {
-			var c:Component = cast(panel, Component);
-			invalidate(InvalidationFlag.SIZE);
-			c.percentHeight = -1;
-			var ucy:Float = c.height;
-			c.autoSize = false;
-			c.width = _layout.usableWidth;
-			c.height = 0;
-			c.clipHeight = 0;
-			c.visible = true;
 			
-			Actuate.tween(c, .2, { height: ucy, clipHeight: ucy }, true).ease(Linear.easeNone).onComplete(function() {
-				c.clearClip();
-				c.autoSize = autoSize;
-				if (autoSize == false) {
-					c.percentHeight = 100;
-				}
-				invalidate(InvalidationFlag.SIZE);
-				if (buttonToHide != null) {
-					buttonToHide.selected = false;
-					removeChild(panelToHide, false);
-				}
-			}).onUpdate(function() {
-				if (panelToHide != null) {
-					panelToHide.height = ucy - c.height;
-					panelToHide.clipHeight = panelToHide.height;
-				}
-			});
-		} else if (transition == "fade") {
-			panel.sprite.alpha = 0;
-			panel.visible = true;
-			Actuate.tween(panel.sprite, .2, { alpha: 1 }, true).ease(Linear.easeNone).onComplete(function() {
-			});
-			if (panelToHide != null) {
-				removeChild(panelToHide, false);
-				buttonToHide.selected = false;
-			}
-		} else {
-			panel.visible = true;
-			if (panelToHide != null) {
-				removeChild(panelToHide, false);
-				buttonToHide.selected = false;
+			if (selectedIndex == index) {
+				// selected index is none.
+				_selectedIndex = -1;
 			}
 		}
 	}
 	
-	private function _onLastComponentReady(event:UIEvent):Void {
-		event.component.removeEventListener(UIEvent.INIT, _onLastComponentReady);
-		var panel:IDisplayObject = event.component.parent;
-		showPanelObject(panel);
+	/** Unselects button without triggering hidePanel() */
+	private function unselectButton(button:Button) {
+		button.allowSelection = false;
+		button.selected = false;
+		button.allowSelection = true;
 	}
 	
-	private function _onPanelAdded(event:UIEvent):Void {
-		var panel:IDisplayObject = event.component;
-		cast(panel, IEventDispatcher).removeEventListener(UIEvent.ADDED_TO_STAGE, _onPanelAdded);
-		cast(panel, IEventDispatcher).removeEventListener(UIEvent.INIT, _onPanelAdded);
-		var c = cast(panel, Component);
-		if (c.numChildren > 0 && c.children[c.numChildren - 1].ready == false) {
-			cast(c.children[c.numChildren - 1], IEventDispatcher).addEventListener(UIEvent.INIT, _onLastComponentReady);
-			return;
-		}
-		showPanelObject(panel);
-	}
-	
-	private function findPanelFromSprite(s:Sprite):IDisplayObject {
-		var panel:IDisplayObject = null;
-		for (p in _panels) {
-			if (p.sprite == s) {
-				panel = p;
-				break;
-			}
-		}
-		return panel;
-	}
 }
 
 private class AccordionButton extends Button {

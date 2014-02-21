@@ -15,7 +15,7 @@ import haxe.ui.toolkit.util.StringUtil;
 
 @:build(haxe.ui.toolkit.core.Macros.addEvents([
 	"init", "resize", "ready",
-	"click", "mouseDown", "mouseUp", "mouseOver", "mouseOut", "mouseMove", "doubleClick", "rollOver", "rollOut", "change",
+	"click", "mouseDown", "mouseUp", "mouseOver", "mouseOut", "mouseMove", "doubleClick", "rollOver", "rollOut", "change", "scroll", 
 	"added", "addedToStage", "removed", "removedFromStage", "activate", "deactivate",
 	"glyphClick"
 ]))
@@ -262,6 +262,9 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	
 	private function set_visible(value:Bool):Bool {
 		_sprite.visible = value;
+		if (_parent != null) {
+			_parent.invalidate(InvalidationFlag.LAYOUT);
+		}
 		return value;
 	}
 	
