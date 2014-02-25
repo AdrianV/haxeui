@@ -1,5 +1,7 @@
 package haxe.ui.toolkit.data;
 
+#if USE_MYSQL
+
 #if (neko || cpp) // not suported on all platforms/targets
 import sys.db.Connection;
 import sys.db.Mysql;
@@ -152,3 +154,5 @@ class MySQLDataSource extends DataSource {
 		createFromString(resourceId, config);
 	}
 }
+
+#end //USE_MYSQL
