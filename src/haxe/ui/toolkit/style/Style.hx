@@ -2,11 +2,14 @@ package haxe.ui.toolkit.style;
 
 import flash.filters.BitmapFilter;
 import flash.geom.Rectangle;
+import haxe.ui.toolkit.core.interfaces.IClonable;
 import haxe.ui.toolkit.core.interfaces.IDisplayObject;
 import haxe.ui.toolkit.core.StyleableDisplayObject;
 import haxe.ui.toolkit.hscript.ScriptManager;
 
-class Style {
+class Style implements IClonable<Style> {
+	public static inline var NONE:Int = -2;
+	
 	private var _dynamicValues:Map<String, String>;
 	private var _target:IDisplayObject;
 	private var _autoApply:Bool = true;
@@ -822,8 +825,11 @@ class Style {
 			this._backgroundImageRect = null;
 		}
 		if (with._backgroundImageScale9 != null) this._backgroundImageScale9 = with._backgroundImageScale9;
-		if (with._backgroundImageRect != null) this._backgroundImageRect = with._backgroundImageRect;
-		if (with._backgroundColor != -1) {
+		if (with._backgroundImageRect != null) this._backgroundImageRect = with ._backgroundImageRect;
+		if (with._backgroundColor == NONE) {
+			this._backgroundColor = -1;
+			this._backgroundColorGradientEnd = -1;
+		} else if (with._backgroundColor != -1) {
 			this._backgroundColor = with._backgroundColor;
 			this._backgroundColorGradientEnd = -1;
 		}
@@ -876,5 +882,15 @@ class Style {
 		if (_backgroundColor != -1 || hasDynamicValue("backgroundColor")) s += "backgroundColor: #" + (_backgroundColor != -1 ? StringTools.hex(_backgroundColor, 6) : _dynamicValues.get("backgroundColor")) + ";\n";
 		if (_backgroundColorGradientEnd != -1 || hasDynamicValue("backgroundColorGradientEnd")) s += "backgroundColorGradientEnd: #" + (_backgroundColorGradientEnd != -1 ? StringTools.hex(_backgroundColorGradientEnd, 6) : _dynamicValues.get("backgroundColorGradientEnd")) + ";\n";
 		return s;
+	}
+	
+	//******************************************************************************************
+	// Clone
+	//******************************************************************************************
+	public function self():Style return new Style();
+	public function clone():Style {
+		var c = self();
+		c.merge(this);
+		return c;
 	}
 }

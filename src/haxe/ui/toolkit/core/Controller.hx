@@ -138,4 +138,9 @@ class Controller {
 		}
 		return popup;
 	}
+	
+	public var namedComponents(get, null):StringMap<IDisplayObjectContainer>;
+	private function get_namedComponents():StringMap<IDisplayObjectContainer> {
+		return _namedComponents;
+	}
 }
