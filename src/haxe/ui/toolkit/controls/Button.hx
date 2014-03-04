@@ -14,13 +14,29 @@ import haxe.ui.toolkit.style.Style;
 
 /**
  General purpose multi-state button control with icon and toggle support (plus icon positioning)
- 
- <b>Events:</b>
- 
- * `MouseEvent.CLICK`	- Dispatched when button is clicked
- * `Event.CHANGE`		- Dispatched when the value of the toggle group changes
+
+ <b>Code Example</b>
+ <pre>
+ var button:Button = new Button();
+ button.x = 100;
+ button.y = 100;
+ button.width = 150;
+ button.height = 100;
+ button.text = "Button";
+ button.id = "theButton";</pre>
+
+ <b>XML Example</b>
+ <pre>
+ &lt;button id="theButton" text="Button" x="100" y="100" width="150" height="100" /&gt;</pre>
  **/
- 
+
+@:event("UIEvent.CLICK", "Dispatched when the button is clicked") 
+@:event("UIEvent.MOUSE_DOWN", "Dispatched when a user presses the pointing device button over the button") 
+@:event("UIEvent.MOUSE_UP", "Dispatched when a user releases the pointing device button over the button") 
+@:event("UIEvent.MOUSE_OVER", "Dispatched when the user moves a pointing device over the button") 
+@:event("UIEvent.MOUSE_OUT", "Dispatched when the user moves a pointing device away from the button") 
+@:event("UIEvent.MOUSE_MOVE", "Dispatched when a user moves the pointing device while it is over the button") 
+@:event("UIEvent.CHANGE", "Dispatched when the value of the toggle group changes") 
 class Button extends StateComponent implements IFocusable implements IClonable<StateComponent> {
 	/**
 	 Button state is "normal" (default state)
@@ -74,10 +90,12 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 	/**
 	 Defines whether this button should remain pressed even when the mouse cursor goes out of the control (and the left mouse button is pressed)
 	 **/
+	@:clonable
 	public var remainPressed(get, set):Bool;
 	/**
 	 Sets the icon asset. Eg: `assets/myicon.png`
 	 **/
+	@:clonable
 	public var icon(get, set):String;
 	
 	private function get_remainPressed():Bool {
@@ -244,6 +262,7 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 	/**
 	 Defines whether or not the button can receive focus by tabbing to it (not yet implemented)
 	 **/
+	@:clonable
 	public var allowFocus(get, set):Bool;
 	
 	private function get_allowFocus():Bool {
@@ -266,22 +285,27 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 		 - `right` - right of the label
 		 - `farRight` - furthest right position possible (honours padding)
 	 **/
+	@:clonable
 	public var iconPosition(get, set):String;
 	/**
 	 Defines whether this button should behave as a toggle button. Toggle buttons maintain thier selection, ie, one click to select, another to deselect
 	 **/
+	@:clonable
 	public var toggle(get, set):Bool;
 	/**
 	 Gets or sets the buttons selected state. Only applicable if the button is a toggle button.
 	 **/
+	@:clonable
 	public var selected(get, set):Bool;
 	/**
 	 Defines the group for this button. Toggle buttons belonging to the same group will only ever have a single option selected.
 	 **/
+	@:clonable
 	public var group(get, set):String;
 	/**
 	 Defines whether this buttons selected state can be modified by the user. Only applicable for toggle buttons.
 	 **/
+	@:clonable
 	public var allowSelection(get, set):Bool;
 	
 	private function get_iconPosition():String {
@@ -458,26 +482,10 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 			}
 		}
 	}
-	
-	//******************************************************************************************
-	// Clone
-	//******************************************************************************************
-	public override function self():Button return new Button();
-	public override function clone():Button {
-		var c:Button = cast super.clone();
-		c.remainPressed = this.remainPressed;
-		c.icon = this.icon;
-		c.allowFocus = this.allowFocus;
-		c.iconPosition = this.iconPosition;
-		c.toggle = this.toggle;
-		c.selected = this.selected;
-		c.group = this.group;
-		c.allowSelection = this.allowSelection;
-		return c;
-	}
 }
 
-private class ButtonLayout extends Layout {
+@exclude
+class ButtonLayout extends Layout {
 	private var _iconPos:String = "center";
 	private var _labelPos:String = "center";
 	

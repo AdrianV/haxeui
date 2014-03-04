@@ -365,6 +365,7 @@ class ListView extends ScrollView implements IDataComponent {
 	}
 }
 
+@exclude
 class ListViewItem extends StateComponent {
 	public static inline var STATE_NORMAL = "normal";
 	public static inline var STATE_OVER = "over";
@@ -383,7 +384,7 @@ class ListViewItem extends StateComponent {
 	
 	private var _parentList:ListView;
 	
-	public function new(parentList:ListView) {
+	public function new(parentList:ListView = null) {
 		super();
 		_parentList = parentList;
 		sprite.buttonMode = true;
@@ -642,7 +643,8 @@ class ListViewItem extends StateComponent {
 	}
 }
 
-private class ListViewItemLayout extends DefaultLayout {
+@exclude
+class ListViewItemLayout extends DefaultLayout {
 	public function new() {
 		super();
 	}

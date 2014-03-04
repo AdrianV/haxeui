@@ -8,10 +8,6 @@ import haxe.ui.toolkit.core.Screen;
 
 /**
  Horizontal slider bar control
- 
- <b>Events:</b>
- 
- * `Event.CHANGE` - Dispatched when value of the progess bar has changed
  **/
 class HSlider extends Slider implements IClonable<HSlider> {
 	public function new() {
@@ -70,14 +66,5 @@ class HSlider extends Slider implements IClonable<HSlider> {
 		var v:Float = xpos - minX;
 		var newValue:Float = min + ((v / ucx) * m);
 		return newValue;
-	}
-	
-	//******************************************************************************************
-	// Clone
-	//******************************************************************************************
-	public override function self():HSlider return new HSlider();
-	public override function clone():HSlider {
-		var c:HSlider = cast super.clone();
-		return c;
 	}
 }

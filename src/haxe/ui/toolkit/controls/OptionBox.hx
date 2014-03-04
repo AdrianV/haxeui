@@ -11,12 +11,9 @@ import haxe.ui.toolkit.style.Style;
 
 /**
  Simple two state option control (supports groups)
- 
- <b>Events:</b>
- 
- * `Event.CHANGE` - Dispatched when value of the option group has changed
  **/
 
+@:event("UIEvent.CHANGE", "Dispatched when the value of the option box is modified") 
 class OptionBox extends Component implements IClonable<OptionBox> {
 	private var _value:OptionBoxValue;
 	private var _label:Text;
@@ -75,10 +72,12 @@ class OptionBox extends Component implements IClonable<OptionBox> {
 	/**
 	 Defines whether the option is checked or not, if set to `true` then other options of the same group will be deselected.
 	 **/
+	@:clonable
 	public var selected(get, set):Bool;
 	/**
 	 Defines the group for this option. Options belonging to the same group will only ever have a single option selected.
 	 **/
+	@:clonable
 	public var group(get, set):String;
 	
 	private function get_selected():Bool {
@@ -169,33 +168,14 @@ class OptionBox extends Component implements IClonable<OptionBox> {
 			_label.style = labelStyle;
 		}
 	}
-	
-	//******************************************************************************************
-	// Clone
-	//******************************************************************************************
-	public override function self():OptionBox return new OptionBox();
-	public override function clone():OptionBox {
-		var c:OptionBox = cast super.clone();
-		c.selected = this.selected;
-		c.group = this.group;
-		return c;
-	}
 }
 
-private class OptionBoxValue extends Value implements IClonable<OptionBoxValue> {
+@exclude
+class OptionBoxValue extends Value implements IClonable<OptionBoxValue> {
 	public function new() {
 		super();
 		_value = "unselected";
 		addValue("selected");
 		addValue("unselected");
-	}
-	
-	//******************************************************************************************
-	// Clone
-	//******************************************************************************************
-	public override function self():OptionBoxValue return new OptionBoxValue();
-	public override function clone():OptionBoxValue {
-		var c:OptionBoxValue = cast super.clone();
-		return c;
 	}
 }

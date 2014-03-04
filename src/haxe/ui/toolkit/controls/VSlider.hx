@@ -8,10 +8,6 @@ import haxe.ui.toolkit.core.Screen;
 
 /**
  Vertical slider bar control
- 
- <b>Events:</b>
- 
- * `Event.CHANGE` - Dispatched when value of the progess bar has changed
  **/
 class VSlider extends Slider implements IClonable<VSlider> {
 	public function new() {
@@ -70,14 +66,5 @@ class VSlider extends Slider implements IClonable<VSlider> {
 		var v:Float = ypos - minY;
 		var newValue:Float = max - ((v / ucy) * m);
 		return newValue;
-	}
-	
-	//******************************************************************************************
-	// Clone
-	//******************************************************************************************
-	public override function self():VSlider return new VSlider();
-	public override function clone():VSlider {
-		var c:VSlider = cast super.clone();
-		return c;
 	}
 }

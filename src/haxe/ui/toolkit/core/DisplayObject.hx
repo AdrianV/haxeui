@@ -20,6 +20,13 @@ import haxe.ui.toolkit.util.StringUtil;
 	"added", "addedToStage", "removed", "removedFromStage", "activate", "deactivate",
 	"glyphClick"
 ]))
+@:build(haxe.ui.toolkit.core.Macros.addClonable())
+@:autoBuild(haxe.ui.toolkit.core.Macros.addClonable())
+@:event("UIEvent.INIT", "Dispatched when the display object has been initialized")
+@:event("UIEvent.READY", "Dispatched when the display object is ready")
+@:event("UIEvent.ADDED_TO_STAGE", "Dispatched when a display object is added to the on stage display list")
+@:event("UIEvent.REMOVED_FROM_STAGE", "Dispatched when a display object is about to be removed from the display list")
+@:event("UIEvent.RESIZE", "Dispatched when the display object has been resized")
 class DisplayObject implements IEventDispatcher implements IDisplayObject implements IDrawable implements IClonable<DisplayObject> {
 	// used in IDisplayObject getters/setters
 	private var _parent:IDisplayObjectContainer;
@@ -80,19 +87,28 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	//******************************************************************************************
 	public var parent(get, set):IDisplayObjectContainer;
 	public var root(get, set):Root;
+	@:clonable
 	public var id(get, set):String;
+	@:clonable
 	public var x(get, set):Float;
+	@:clonable
 	public var y(get, set):Float;
+	@:clonable
 	public var width(get, set):Float;
+	@:clonable
 	public var height(get, set):Float;
+	@:clonable
 	public var percentWidth(get, set):Float;
+	@:clonable
 	public var percentHeight(get, set):Float;
 	public var ready(get, null):Bool;
 	public var sprite(get, null):Sprite;
 	public var stageX(get, null):Float;
 	public var stageY(get, null):Float;
 	public var visible(get, set):Bool;
+	@:clonable
 	public var horizontalAlign(get, set):String;
+	@:clonable
 	public var verticalAlign(get, set):String;
 	
 	private function get_parent():IDisplayObjectContainer {
@@ -453,24 +469,5 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 			fnEvent.displayObject = this;
 			fn(fnEvent);
 		}
-	}
-	
-	//******************************************************************************************
-	// Clone
-	//******************************************************************************************
-	public function self():DisplayObject return new DisplayObject();
-	public function clone():DisplayObject {
-		var c = self();
-		c.id = this.id;
-		c.x = this.x;
-		c.y = this.y;
-		c.width = this.width;
-		c.height = this.height;
-		c.percentWidth = this.percentWidth;
-		c.percentHeight = this.percentHeight;
-		c.visible = this.visible;
-		c.horizontalAlign = this.horizontalAlign;
-		c.verticalAlign = this.verticalAlign;
-		return c;
 	}
 }
