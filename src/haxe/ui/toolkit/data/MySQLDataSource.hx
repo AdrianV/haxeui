@@ -9,7 +9,7 @@ import sys.db.ResultSet;
 #end
 
 class MySQLDataSource extends DataSource {
-	/*
+	
 	private var _connectionDetails:Dynamic;
 	private var _query:String;
 	private var _currentRecord:Dynamic;
