@@ -7,6 +7,7 @@ import flash.geom.Rectangle;
 import haxe.ui.toolkit.containers.ListView;
 import haxe.ui.toolkit.controls.Button;
 import haxe.ui.toolkit.core.interfaces.IEventDispatcher;
+import haxe.ui.toolkit.core.interfaces.IItemRenderer;
 import haxe.ui.toolkit.core.PopupManager;
 import haxe.ui.toolkit.core.Toolkit;
 import haxe.ui.toolkit.data.ArrayDataSource;
@@ -29,7 +30,7 @@ import motion.easing.Linear;
  
  **/
 
-class List extends Button implements IDataComponent {
+class ListSelector extends Button implements IDataComponent {
 	private var _dataSource:IDataSource;
 	private var _list:ListView;
 	
@@ -37,7 +38,7 @@ class List extends Button implements IDataComponent {
 	private var _method:String = "";
 	
 	private var _selectedIndex:Int = -1;
-	private var _selectedItems:Array<ListViewItem>;
+	private var _selectedItems:Array<IItemRenderer>;
 	
 	//private var _transition:String = "slide";
 	
@@ -111,9 +112,9 @@ class List extends Button implements IDataComponent {
 	 **/
 	public function showList():Void {
 		if (_method == "popup") {
-			PopupManager.instance.showList(root, dataSource, "Select", _selectedIndex, true, function(item:ListViewItem) {
+			PopupManager.instance.showList(dataSource, _selectedIndex, "Select", function(item:IItemRenderer) {
 				this.text = item.text;
-				_selectedItems = new Array<ListViewItem>();
+				_selectedItems = new Array<IItemRenderer>();
 				_selectedItems.push(item);
 				this.selected = false;
 				var event:Event = new Event(Event.CHANGE);
@@ -152,7 +153,7 @@ class List extends Button implements IDataComponent {
 			_list.height = listHeight;
 			_list.setSelectedIndexNoEvent(_selectedIndex);
 
-			var transition:String = Toolkit.getTransitionForClass(List);
+			var transition:String = Toolkit.getTransitionForClass(ListSelector);
 			if (transition == "slide") {
 				_list.clipHeight = 0;
 				_list.sprite.alpha = 1;
@@ -179,7 +180,7 @@ class List extends Button implements IDataComponent {
 	 **/
 	public function hideList():Void {
 		if (_list != null) {
-			var transition:String = Toolkit.getTransitionForClass(List);
+			var transition:String = Toolkit.getTransitionForClass(ListSelector);
 			if (transition == "slide") {
 				_list.sprite.alpha = 1;
 				Actuate.tween(_list, .1, { clipHeight: 0 }, true).ease(Linear.easeNone).onComplete(function() {
@@ -226,9 +227,9 @@ class List extends Button implements IDataComponent {
 	/**
 	 Returns an array of the selected list items
 	 **/
-	public var selectedItems(get, null):Array<ListViewItem>;
+	public var selectedItems(get, null):Array<IItemRenderer>;
 	
-	private function get_selectedItems():Array<ListViewItem> {
+	private function get_selectedItems():Array<IItemRenderer> {
 		return _selectedItems;
 	}
 	

@@ -4,8 +4,10 @@ import flash.events.Event;
 import flash.events.TimerEvent;
 import flash.utils.Timer;
 import haxe.ui.toolkit.containers.ListView;
+import haxe.ui.toolkit.core.interfaces.IItemRenderer;
 import haxe.ui.toolkit.core.PopupManager;
 import haxe.ui.toolkit.data.IDataSource;
+import haxe.ui.toolkit.events.UIEvent;
 
 /**
  List content for list popups
@@ -36,7 +38,7 @@ class ListPopupContent extends PopupContent {
 	private override function initialize():Void {
 		super.initialize();
 
-		_list.addEventListener(Event.CHANGE, _onListChange);
+		_list.addEventListener(UIEvent.CHANGE, _onListChange);
 		
 		addChild(_list);
 		var n:Int = _maxListSize;
@@ -82,7 +84,7 @@ class ListPopupContent extends PopupContent {
 	//******************************************************************************************
 	// Event handlers
 	//******************************************************************************************
-	private function _onListChange(event:Event):Void {
+	private function _onListChange(event:UIEvent):Void {
 		hideTimer = new Timer(400, 1);
 		hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _onTimerComplete);
 		hideTimer.start();
@@ -95,7 +97,7 @@ class ListPopupContent extends PopupContent {
 		}
 		
 		if (_fn != null) {
-			var item:ListViewItem = _list.selectedItems[0];
+			var item:IItemRenderer = _list.selectedItems[0];
 			var index:Int = Lambda.indexOf(_list.selectedItems, item);
 			var param:Dynamic = {
 				text: item.text,
