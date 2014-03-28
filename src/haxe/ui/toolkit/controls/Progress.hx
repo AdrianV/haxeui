@@ -1,8 +1,6 @@
 package haxe.ui.toolkit.controls;
 
-import flash.display.Bitmap;
 import flash.events.Event;
-import flash.Lib;
 import haxe.ui.toolkit.core.base.State;
 import haxe.ui.toolkit.core.Component;
 import haxe.ui.toolkit.core.interfaces.Direction;
@@ -13,7 +11,6 @@ import haxe.ui.toolkit.core.interfaces.InvalidationFlag;
 import haxe.ui.toolkit.core.interfaces.IScrollable;
 import haxe.ui.toolkit.core.StateComponent;
 import haxe.ui.toolkit.layout.DefaultLayout;
-import haxe.ui.toolkit.layout.Layout;
 
 /**
  Progress bar control
@@ -187,7 +184,6 @@ class HProgressLayout extends DefaultLayout {
 		
 		var scroll:IScrollable = cast(container, IScrollable);
 		if (value != null) {
-			var m:Float = scroll.max - scroll.min;
 			var ucx:Float = usableWidth;
 			
 			var thumb:IDisplayObject =  container.findChild("thumb");
@@ -196,7 +192,7 @@ class HProgressLayout extends DefaultLayout {
 			}
 			
 			value.percentWidth = -1; // we dont want value to ever % size
-			var cx:Float = (scroll.pos / m) * ucx;
+			var cx:Float = (scroll.pos - scroll.min) / (scroll.max - scroll.min) * ucx; // get the position in percentage for (min, max) values. cx is always between (0, usableWidth)
 
 			if (cx < 0) {
 				cx = 0;
@@ -256,7 +252,6 @@ class VProgressLayout extends DefaultLayout {
 		
 		var scroll:IScrollable = cast(container, IScrollable);
 		if (value != null) {
-			var m:Float = scroll.max - scroll.min;
 			var ucy:Float = usableHeight;
 			
 			var thumb:IDisplayObject =  container.findChild("thumb");
@@ -265,7 +260,8 @@ class VProgressLayout extends DefaultLayout {
 			}
 			
 			value.percentHeight = -1; // we dont want value to ever % size
-			var cy:Float = (scroll.pos / m) * ucy;
+			var cy:Float = (scroll.pos - scroll.min) / (scroll.max - scroll.min) * ucy; // get the position in percentage for (min, max) values. cy is always between (0, usableWidth)
+			
 			if (cy < 0) {
 				cy = 0;
 			} else if (cy > ucy) {
