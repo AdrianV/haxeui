@@ -55,6 +55,8 @@ class VScroll extends Scroll implements IScrollable implements IClonable<VScroll
 		
 		if (_hasButtons == true) {
 			_deincButton = new Button();
+			_deincButton.autoSize = false;
+			_deincButton.iconPosition = "center";
 			_deincButton.percentWidth = 100;
 			_deincButton.height = layout.innerWidth;
 			_deincButton.id = "deinc";
@@ -63,6 +65,8 @@ class VScroll extends Scroll implements IScrollable implements IClonable<VScroll
 			addChild(_deincButton);
 			
 			_incButton = new Button();
+			_incButton.autoSize = false;
+			_incButton.iconPosition = "center";
 			_incButton.percentWidth = 100;
 			_incButton.height = layout.innerWidth;
 			_incButton.id = "inc";
@@ -72,6 +76,8 @@ class VScroll extends Scroll implements IScrollable implements IClonable<VScroll
 		}
 		
 		_thumb = new Button();
+		_thumb.iconPosition = "center";
+		_thumb.autoSize = false;
 		_thumb.percentWidth = 100;
 		_thumb.height = 50;
 		_thumb.id = "thumb";
@@ -307,14 +313,24 @@ class VScrollLayout extends DefaultLayout {
 	public override function resizeChildren():Void {
 		super.resizeChildren();
 		
+		var deinc:IDisplayObject =  container.findChild("deinc");
+		if (deinc != null) {
+			deinc.height = innerWidth;
+		}
+
+		var inc:IDisplayObject =  container.findChild("inc");
+		if (inc != null) {
+			inc.height = innerWidth;
+		}
+		
 		var scroll:IScrollable = cast(container, IScrollable);
 		var thumb:IDisplayObject =  container.findChild("thumb");
 		if (thumb != null) {
 			var m:Float = scroll.max - scroll.min;
 			var ucy:Float = usableHeight;
 			var thumbHeight = (scroll.pageSize / m) * ucy;
-			if (thumbHeight < 20) {
-				thumbHeight = 20;
+			if (thumbHeight < innerWidth) {
+				thumbHeight = innerWidth;
 			} else if (thumbHeight > ucy) {
 				thumbHeight = ucy;
 			}

@@ -4,12 +4,13 @@
     "license"      : "MIT",
     "tags"         : ["rich", "ui"],
     "description"  : "Styleable application centric rich UI",
-    "version"      : "1.3.0",
+    "version"      : "1.3.4",
     "releasenote"  : "",
     "contributors" : ["ianharrigan"],
     "dependencies" : {
         "openfl"        : "",
         "actuate"       : "",
-        "hscript"       : ""
+        "hscript"       : "",
+        "svg"           : ""
     }
 }

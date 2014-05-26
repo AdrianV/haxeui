@@ -3,6 +3,7 @@ package haxe.ui.toolkit.style;
 import flash.geom.Rectangle;
 import haxe.ui.toolkit.hscript.ScriptUtils;
 import haxe.ui.toolkit.util.FilterParser;
+import haxe.ui.toolkit.util.StringUtil;
 
 class StyleParser {
 	public static function fromString(styleString:String):Styles {
@@ -23,9 +24,14 @@ class StyleParser {
 			var props:Array<String> = styleData.split(";");
 			for (prop in props) {
 				prop = StringTools.trim(prop);
+				if (StringTools.startsWith(prop, "//")) {
+					continue;
+				}
+
 				if (prop != null && prop.length > 0) {
 					var temp:Array<String> = prop.split(":");
 					var propName = StringTools.trim(temp[0]);
+					propName = StringUtil.capitalizeHyphens(propName);
 					if (Reflect.field(style, "set_" + propName) == null) {
 						trace("Warning: " + propName + " no found");
 						continue;

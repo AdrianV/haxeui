@@ -309,6 +309,7 @@ class Macros {
 			if (styleData.length > 0) {
 				var props:Array<String> = styleData.split(":");
 				var propName:String = StringTools.trim(props[0]);
+				propName = StringUtil.capitalizeHyphens(propName);
 				var propValue:String = StringTools.trim(props[1]);
 				if (ScriptUtils.isScript(propValue) && !ScriptUtils.isCssException(propName)) {
 					dynamicValues.set(propName, propValue);
@@ -382,7 +383,7 @@ class Macros {
 			var files:Array<String> = sys.FileSystem.readDirectory(dir);
 			if (files != null) {
 				for (file in files) {
-					if (file.indexOf(".hx") != -1) {
+					if (StringTools.endsWith(file, ".hx") && !StringTools.startsWith(file, ".")) {
 						var name:String = file.substr(0, file.length - 3);
 						var path:String = Context.resolvePath(dir + "/" + file);
 						
@@ -427,7 +428,7 @@ class Macros {
 			var files:Array<String> = sys.FileSystem.readDirectory(dir);
 			if (files != null) {
 				for (file in files) {
-					if (file.indexOf(".hx") != -1) {
+					if (StringTools.endsWith(file, ".hx") && !StringTools.startsWith(file, ".")) {
 						var name:String = file.substr(0, file.length - 3);
 						var path:String = Context.resolvePath(dir + "/" + file);
 						

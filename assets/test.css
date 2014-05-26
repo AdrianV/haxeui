@@ -5,3 +5,11 @@ Button:disabled {
 .toolbar-new  {
 	icon: "img/rtfview/edit-bold.png";
 }
+
+Text {
+	//background-color: 0x0000FF;
+}
+
+Button #label {
+	//background-color: 0xFF0000;
+}

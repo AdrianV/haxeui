@@ -5,22 +5,47 @@ import haxe.ui.toolkit.core.PopupManager;
 import haxe.ui.toolkit.core.Toolkit;
 import haxe.ui.toolkit.core.XMLController;
 import haxe.ui.toolkit.events.UIEvent;
+import haxe.ui.toolkit.resources.ResourceManager;
 import haxe.ui.toolkit.util.CallStackHelper;
 
 @:build(haxe.ui.toolkit.core.Macros.buildController("assets/test2.xml"))
 class TestController2 extends XMLController {
 	public function new() {
-		test.onClick = function(e) {
-			//documenttabs.setTabText(0, "Panel 1*");
-			showSimplePopup("The theme has been changed. You must restart (or refresh) the application to use the new theme");
-			//showCustomPopup("assets/custom.xml", "Something Nice", {buttons: [PopupButton.CONFIRM, PopupButton.CANCEL], width: 500});
-			//list1.width = 400;
-			//trace("bob");
+		
+		documenttabs.onReady = function(e) {
+			documenttabs.getTabButton(0).icon = "img/rtfview/edit-alignment-center.png";
+			documenttabs.getTabButton(1).icon = "img/rtfview/edit-alignment-center.png";
+			//documenttabs.getTabButton(2).icon = "img/rtfview/edit-alignment-center.png";
+			documenttabs.getTabButton(3).icon = "img/rtfview/edit-alignment-center.png";
 		};
 		
-		test.onReady = function(e) {
-			//list1.width = 400;
+		/*
+		bigger.onClick = function(e) {
+			documenttabs.setTabText(0, "The tab text is now bigger");
+		}
+
+		theInput.onChange = function(e) {
+			trace("change");
+		}
+		*/
+		
+		/*
+		smaller.onClick = function(e) {
+			documenttabs.setTabText(0, "Small");
+		}
+		*/
+		
+		/*
+		test.onClick = function(e) {
+			//showSimplePopup("The theme has been changed. You must restart (or refresh) the application to use the new theme");
+			theButton2.icon = ResourceManager.instance.getBitmapData("img/slinky_small.jpg");
 		};
+		*/
+		
+		/*
+		test.onReady = function(e) {
+		};
+		*/
 		
 
 		/*

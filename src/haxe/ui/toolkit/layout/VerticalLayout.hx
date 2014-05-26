@@ -51,6 +51,14 @@ class VerticalLayout extends Layout {
 			if (totalHeight > 0 && totalHeight != innerHeight && container.percentHeight == -1) {
 				container.height = totalHeight + (padding.top + padding.bottom);
 			}
+		} else {
+			if (totalWidth > 0 && container.height == 0) {
+				container.width = totalWidth + (padding.left + padding.right);
+				container.height = totalHeight + (padding.top + padding.bottom);
+			} else if (totalHeight > 0 && container.width == 0) {
+				container.width = totalWidth + (padding.left + padding.right);
+				container.height = totalHeight + (padding.top + padding.bottom);
+			}
 		}
 	}
 	
@@ -70,7 +78,7 @@ class VerticalLayout extends Layout {
 				case HorizontalAlign.CENTER:
 					xpos = (container.width / 2) - (child.width / 2);
 				case HorizontalAlign.RIGHT:
-					xpos = container.width - child.width;
+					xpos = container.width - child.width - padding.left;
 				default:	
 			}
 			
