@@ -1,16 +1,18 @@
 package haxe.ui.toolkit.style;
 
-import flash.display.BitmapData;
-import flash.display.GradientType;
-import flash.display.Graphics;
-import flash.display.InterpolationMethod;
-import flash.display.SpreadMethod;
-import flash.geom.Matrix;
-import flash.geom.Point;
-import flash.geom.Rectangle;
+import openfl.display.BitmapData;
+import openfl.display.GradientType;
+import openfl.display.Graphics;
+import openfl.display.InterpolationMethod;
+import openfl.display.SpreadMethod;
+import openfl.geom.Matrix;
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
 import haxe.ds.StringMap;
 import haxe.ui.toolkit.resources.ResourceManager;
+#if svg
 import format.SVG;
+#end
 
 class StyleHelper {
 	private static var sectionCache:StringMap<BitmapData>;
@@ -119,8 +121,10 @@ class StyleHelper {
                 }
             } else {
                 // svg image!
+				#if svg
                 var svg:SVG = ResourceManager.instance.getSVG(style.backgroundImage);
                 svg.render(g, rc.left, rc.top, cast rc.width, cast rc.height);
+				#end
             }
 		}
 	}

@@ -1,6 +1,6 @@
 package haxe.ui.toolkit.core;
 
-import flash.Lib;
+import openfl.Lib;
 import haxe.ds.StringMap;
 import haxe.ui.toolkit.controls.Menu;
 import haxe.ui.toolkit.core.interfaces.IDataComponent;
@@ -22,14 +22,19 @@ class Toolkit {
 	public static var instance(get, null):Toolkit;
 	private static function get_instance():Toolkit {
 		if (_instance == null) {
-			Lib.current.stage.align = flash.display.StageAlign.TOP_LEFT;
-			Lib.current.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
+			Lib.current.stage.align = openfl.display.StageAlign.TOP_LEFT;
+			Lib.current.stage.scaleMode = openfl.display.StageScaleMode.NO_SCALE;
 			_instance = new Toolkit();
 		}
 		return _instance;
 	}
 	
 	public static function init():Void {
+		#if dconsole
+		haxe.ui.toolkit.console.HaxeUIConsole.init();
+		#end
+		
+		Macros.registerModules();
 		get_instance();
 		registerXMLProcessor(UIProcessor, "ui");
 		registerXMLProcessor(UIProcessor, "selection");
@@ -40,12 +45,20 @@ class Toolkit {
 			setTransitionForClass(Menu, "fade"); // fade looks nicer
 		}
 		
-		if (theme == null && useDefaultTheme == true) {
-			theme = new DefaultTheme();
+		var t:Theme = null;
+		if (Std.is(theme, Theme)) {
+			t = cast theme;
+		} else if (Std.is(theme, String)) {
+			t = new Theme();
+			t.name = cast theme;
 		}
 		
-		if (theme != null) {
-			theme.apply();
+		if (t == null && useDefaultTheme == true) {
+			t = new DefaultTheme();
+		}
+		
+		if (t != null) {
+			t.apply();
 		}
 	}
 
@@ -61,7 +74,7 @@ class Toolkit {
 	// Theme functions
 	//******************************************************************************************
 	public static var useDefaultTheme(default, default):Bool = true;
-	public static var theme(default, default):Theme;
+	public static var theme(default, default):Dynamic;
 	
 	//******************************************************************************************
 	// Processes a chunk of xml, return values depend on what comes in, could return IDisplayObject, IDataSource
@@ -136,6 +149,9 @@ class Toolkit {
 			} else {
 				var p:IXMLProcessor = new UIProcessor();
 				result = p.process(node);
+				if (result == null) {
+					trace("WARNING: Could not find processor for '" + nodeName + "'");
+				}
 			}
 		}
 		

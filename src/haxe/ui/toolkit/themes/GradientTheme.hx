@@ -7,13 +7,4 @@ class GradientTheme extends Theme {
 		super();
 		name = "gradient";
 	}
-	
-	public override function apply():Void {
-		super.apply();
-		#if mobile
-			Macros.addStyleSheet("styles/gradient/gradient_mobile.css");
-		#else
-			Macros.addStyleSheet("styles/gradient/gradient.css");
-		#end
-	}
 }

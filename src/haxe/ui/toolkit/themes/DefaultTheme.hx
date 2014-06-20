@@ -8,9 +8,4 @@ class DefaultTheme extends Theme {
 		super();
 		name = "default";
 	}
-	
-	public override function apply():Void {
-		super.apply();
-		StyleManager.instance.addStyles(new DefaultStyles());
-	}
 }

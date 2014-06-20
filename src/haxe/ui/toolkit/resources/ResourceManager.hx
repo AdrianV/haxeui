@@ -1,13 +1,15 @@
 package haxe.ui.toolkit.resources;
 
-import flash.display.Bitmap;
-import flash.display.BitmapData;
-import flash.display.Loader;
-import flash.utils.ByteArray;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+import openfl.display.Loader;
+import openfl.utils.ByteArray;
 import haxe.Resource;
 import haxe.ui.toolkit.util.ByteConverter;
 import openfl.Assets;
+#if svg
 import format.SVG;
+#end
 
 class ResourceManager {
 	private static var _instance:ResourceManager;
@@ -24,6 +26,10 @@ class ResourceManager {
 	//******************************************************************************************
 	public function new() {
 		
+	}
+	
+	public function hasAsset(resouceId:String):Bool {
+		return Assets.exists(resouceId);
 	}
 	
 	public function getXML(resourceId:String, locale:String = null):Xml {
@@ -43,7 +49,8 @@ class ResourceManager {
 		return str;
 	}
 
-    public function getSVG(resourceId:String, locale:String = null) : SVG {
+	#if svg
+    public function getSVG(resourceId:String, locale:String = null):SVG {
       var text:String = getText(resourceId, locale);
       var svg : SVG = null;
       if (text != null) {
@@ -51,6 +58,7 @@ class ResourceManager {
       }
       return svg;
     }
+	#end
 	
 	public function getBitmapData(resourceId:String, locale:String = null):BitmapData {
 		if (resourceId == null || resourceId.length == 0) {

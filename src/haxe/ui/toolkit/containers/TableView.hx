@@ -1,8 +1,8 @@
 package haxe.ui.toolkit.containers;
 
-import flash.events.Event;
-import flash.events.IEventDispatcher;
-import flash.events.MouseEvent;
+import openfl.events.Event;
+import openfl.events.IEventDispatcher;
+import openfl.events.MouseEvent;
 import haxe.ui.toolkit.controls.Button;
 import haxe.ui.toolkit.controls.HProgress;
 import haxe.ui.toolkit.controls.HSlider;
@@ -466,7 +466,7 @@ class TableViewRow extends HBox implements IStateComponent {
 		for (s in states) {
 			var stateStyle:Style = StyleManager.instance.buildStyleFor(this, s);
 			if (stateStyle != null) {
-				stateStyle.merge(_setStyle);
+				//stateStyle.merge(_setStyle);
 				storeStyle(s, stateStyle);
 			}
 		}

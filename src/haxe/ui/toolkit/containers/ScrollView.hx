@@ -1,11 +1,11 @@
 package haxe.ui.toolkit.containers;
 
-import flash.display.DisplayObject;
-import flash.display.Sprite;
-import flash.events.Event;
-import flash.events.MouseEvent;
-import flash.geom.Point;
-import flash.geom.Rectangle;
+import openfl.display.DisplayObject;
+import openfl.display.Sprite;
+import openfl.events.Event;
+import openfl.events.MouseEvent;
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
 import haxe.ui.toolkit.controls.HScroll;
 import haxe.ui.toolkit.controls.VScroll;
 import haxe.ui.toolkit.core.base.State;
@@ -273,7 +273,8 @@ class ScrollView extends StateComponent {
 	
 	private function set_vscrollPageSize(value:Float):Float {
 		if (_virtualScrolling == true) {
-			
+			createVScroll(true);
+			_vscroll.pageSize = value;
 		}
 		return value;
 	}
@@ -554,6 +555,10 @@ class ScrollView extends StateComponent {
 	}
 	
 	private function updateScrollRect():Void {
+		if (!_ready) {
+			return;
+		}
+
 		if (numChildren > 0 && _virtualScrolling == false) {
 			var content:IDisplayObject = _container.getChildAt(0);
 			if (content != null) {

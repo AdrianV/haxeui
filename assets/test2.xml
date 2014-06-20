@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <vbox width="100%" height="100%" style="spacing:2;">
+	<bob />
 	<menubar>
 		<menubutton text="Application" id="menuApplication">
 			<menu>

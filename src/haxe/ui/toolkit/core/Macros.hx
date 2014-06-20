@@ -4,8 +4,57 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.ui.toolkit.hscript.ScriptUtils;
 import haxe.ui.toolkit.util.StringUtil;
+import haxe.ui.toolkit.util.XmlUtil;
 
 class Macros {
+	private static var componentClasses:Map<String, String> = new Map<String, String>();
+	private static var dataSourceClasses:Map<String, String> = new Map<String, String>();
+	private static var themeResources:Map<String, Array<String>> = new Map<String, Array<String>>();
+	
+	macro public static function registerModules() {
+		var code:String = "function() {\n";
+		
+		processModules();
+		var currentClassName:String = Context.getLocalClass().toString();
+			
+		for (alias in componentClasses.keys()) {
+			var className = componentClasses.get(alias);
+			if (currentClassName.indexOf("ClassManager") != -1) {
+				code += "\tregisterComponentClassName('" + className + "', '" + alias.toLowerCase() + "');\n";
+			} else {
+				code += "\thaxe.ui.toolkit.core.ClassManager.instance.registerComponentClassName('" + className + "', '" + alias.toLowerCase() + "');\n";
+			}
+		}
+		
+		for (alias in dataSourceClasses.keys()) {
+			var className = dataSourceClasses.get(alias);
+			if (currentClassName.indexOf("ClassManager") != -1) {
+				code += "\tregisterDataSourceClassName('" + className + "', '" + alias.toLowerCase() + "');\n";
+			} else {
+				code += "\thaxe.ui.toolkit.core.ClassManager.instance.registerDataSourceClassName('" + className + "', '" + alias.toLowerCase() + "');\n";
+			}
+		}
+		
+		for (themeName in themeResources.keys()) {
+			var list:Array<String> = themeResources.get(themeName);
+			if (themeName == "public") {
+				themeName = "__PUBLIC__";
+			}
+			for (res in list) {
+				if (StringTools.startsWith(res, "CLASS:")) {
+					var className:String = res.substr(6, res.length);
+					code += "\thaxe.ui.toolkit.themes.Theme.addAsset('" + themeName + "', " + className + ");\n";
+				} else {
+					code += "\thaxe.ui.toolkit.themes.Theme.addAsset('" + themeName + "', '" + res + "');\n";
+				}
+			}
+		}
+		
+		code += "}()\n";
+		//trace(code);
+		return Context.parseInlineString(code, Context.currentPos());
+	}
+	
 	macro public static function addClonable():Array<Field> {
         var pos = haxe.macro.Context.currentPos();
         var fields = haxe.macro.Context.getBuildFields();
@@ -112,8 +161,190 @@ class Macros {
 		return fields;
 	}
 	
+	#if macro
+	private static var modulesProcessed:Bool;
+	private static function processModules():Void {
+		if (modulesProcessed == true) {
+			return;
+		}
+		
+		var paths:Array<String> = Context.getClassPath();
+		while (paths.length != 0) {
+			var path:String = paths[0];
+			paths.remove(path);
+			
+			if (sys.FileSystem.exists(path)) {
+				if (sys.FileSystem.isDirectory(path)) {
+					var subDirs:Array<String> = sys.FileSystem.readDirectory(path);
+					for (subDir in subDirs) {
+						if (StringTools.endsWith(path, "/") == false && StringTools.endsWith(path, "\\") == false) {
+							subDir = path + "/" + subDir;
+						} else {
+							subDir = path + subDir;
+						}
+						
+						if (sys.FileSystem.isDirectory(subDir)) {
+							paths.insert(0, subDir);
+						} else {
+							var file:String = subDir;
+							if (StringTools.endsWith(file, "module.xml")) {
+								processModule(file);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		modulesProcessed = true;
+	}
+	
+	private static function processModule(file:String):Void {
+		var xml:Xml = Xml.parse(sys.io.File.getContent(file));
+		var m:Xml = xml.firstElement();
+		for (exports in m.elementsNamed("exports")) {
+			processComponentExports(exports);
+			processDataSourceExports(exports);
+		}
+		
+		for (themes in m.elementsNamed("themes")) {
+			processThemeResources(themes);
+		}
+	}
+	
+	private static function processComponentExports(exports:Xml):Void {
+		for (c in exports.elementsNamed("component")) {
+			var className:String = c.get("class");
+			var classAlias:String = c.get("alias");
+			var classPackage:String = c.get("package");
+			
+			var types:Array<haxe.macro.Type> = null;
+			
+			if (className != null) {
+				types = Context.getModule(className);
+			} else if (classPackage != null) {
+				types = getTypesFromPackage(classPackage);
+			}
+			
+			if (types != null) {
+				for (t in types) {
+					if (hasInterface(t, "haxe.ui.toolkit.core.interfaces.IDisplayObject")) {
+						var resolvedClass:String = getClassNameFromType(t);
+						if (className != null && resolvedClass != className) {
+							continue;
+						}
+						if (classAlias == null) {
+							classAlias = resolvedClass.substr(resolvedClass.lastIndexOf(".") + 1, resolvedClass.length);
+						}
+						classAlias = classAlias.toLowerCase();
+						componentClasses.set(classAlias, resolvedClass);
+						classAlias = null;
+					}
+				}
+			}
+		}
+	}
+	
+	private static function processDataSourceExports(exports:Xml):Void {
+		for (c in exports.elementsNamed("dataSource")) {
+			var className:String = c.get("class");
+			var classAlias:String = c.get("alias");
+			var classPackage:String = c.get("package");
+			
+			var types:Array<haxe.macro.Type> = null;
+			
+			if (className != null) {
+				types = Context.getModule(className);
+			} else if (classPackage != null) {
+				types = getTypesFromPackage(classPackage);
+			}
+			
+			if (types != null) {
+				for (t in types) {
+					if (hasInterface(t, "haxe.ui.toolkit.data.IDataSource")) {
+						var resolvedClass:String = getClassNameFromType(t);
+						if (className != null && resolvedClass != className) {
+							continue;
+						}
+						if (classAlias == null) {
+							classAlias = resolvedClass.substr(resolvedClass.lastIndexOf(".") + 1, resolvedClass.length);
+							classAlias = StringTools.replace(classAlias, "DataSource", "");
+						}
+						classAlias = classAlias.toLowerCase();
+						if (classAlias.length > 0) {
+							dataSourceClasses.set(classAlias, resolvedClass);
+						}
+						classAlias = null;
+					}
+				}
+			}
+		}
+	}
+	
+	private static function processThemeResources(themes:Xml):Void {
+		for (e in themes.elements()) {
+			processThemeStyles(e);
+		}
+	}
+	
+	private static function processThemeStyles(parent:Xml):Void {
+		var themeName:String = parent.nodeName;
+		for (styles in parent.elementsNamed("styles")) {
+			var stylesPath:String = styles.get("path");
+			var stylesClass:String = styles.get("class");
+			
+			var stylesEntry = null;
+			if (stylesPath != null) {
+				stylesEntry = stylesPath;
+			} else if (stylesClass != null) {
+				stylesEntry = "CLASS:" + stylesClass;
+			}
+
+			if (stylesEntry != null) {
+				var list:Array<String> = themeResources.get(themeName);
+				if (list == null) {
+					list = new Array<String>();
+					themeResources.set(themeName, list);
+				}
+				
+				list.push(stylesEntry);
+			}
+		}
+	}
+	
+	private static function getTypesFromPackage(pack:String):Array<haxe.macro.Type> {
+		var types:Array<haxe.macro.Type> = new Array<haxe.macro.Type>();
+		
+		var paths:Array<String> = Context.getClassPath();
+		var arr:Array<String> = pack.split(".");
+		for (path in paths) {
+			var dir:String = path + arr.join("/");
+			if(!sys.FileSystem.exists(dir) || !sys.FileSystem.isDirectory(dir)) {
+				continue;
+			}
+			
+			var files:Array<String> = sys.FileSystem.readDirectory(dir);
+			if (files != null) {
+				for (file in files) {
+					if (StringTools.endsWith(file, ".hx") && !StringTools.startsWith(file, ".")) {
+						var name:String = file.substr(0, file.length - 3);
+						var temp:Array<haxe.macro.Type> = Context.getModule(pack + "." + name);
+						types = types.concat(temp);
+					}
+				}
+			}
+		}
+		
+		return types;
+	}
+	
+	#end
+	
 	macro public static function buildController(resourcePath:String):Array<Field> {
-        var pos = haxe.macro.Context.currentPos();
+		var pos = haxe.macro.Context.currentPos();
+
+		processModules();
+		
         var fields = haxe.macro.Context.getBuildFields();
 		var ctor = null;
 		for (f in fields) {
@@ -191,6 +422,8 @@ class Macros {
 			var cls:String = componentClasses.get(nodeName);
 			if (cls != null) {
 				types.set(id, cls);
+			} else {
+				trace("WARNING: '" + nodeName + "' hasnt been registered");
 			}
 		}
 		for (child in node.elements()) {
@@ -329,11 +562,11 @@ class Macros {
 						filterParams = propValue.substring(n + 1, propValue.length - 1);
 					}
 					if (StringTools.startsWith(propValue, "dropShadow")) {
-						propValue = "new flash.filters.DropShadowFilter(" + filterParams + ")";
+						propValue = "new openfl.filters.DropShadowFilter(" + filterParams + ")";
 					} else if (StringTools.startsWith(propValue, "blur")) {
-						propValue = "new flash.filters.BlurFilter(" + filterParams + ")";
+						propValue = "new openfl.filters.BlurFilter(" + filterParams + ")";
 					} else if (StringTools.startsWith(propValue, "glow")) {
-						propValue = "new flash.filters.GlowFilter(" + filterParams + ")";
+						propValue = "new openfl.filters.GlowFilter(" + filterParams + ")";
 					} else {
 						propValue = "null";
 					}
@@ -343,10 +576,10 @@ class Macros {
 					var y1:Int = Std.parseInt(coords[1]);
 					var x2:Int = Std.parseInt(coords[2]);
 					var y2:Int = Std.parseInt(coords[3]);
-					propValue = "new flash.geom.Rectangle(" + x1 + "," + y1 + "," + (x2 - x1) + "," + (y2 - y1) + ")";
+					propValue = "new openfl.geom.Rectangle(" + x1 + "," + y1 + "," + (x2 - x1) + "," + (y2 - y1) + ")";
 				} else if (propName == "backgroundImageRect") {
 					var arr:Array<String> = propValue.split(",");
-					propValue = "new flash.geom.Rectangle(" + Std.parseInt(arr[0]) + "," + Std.parseInt(arr[1]) + "," + Std.parseInt(arr[2]) + "," + Std.parseInt(arr[3]) + ")";
+					propValue = "new openfl.geom.Rectangle(" + Std.parseInt(arr[0]) + "," + Std.parseInt(arr[1]) + "," + Std.parseInt(arr[2]) + "," + Std.parseInt(arr[3]) + ")";
 				}
 				
 				if (StringTools.startsWith(propValue, "#")) { // lazyness
@@ -364,98 +597,6 @@ class Macros {
 		code += "\thaxe.ui.toolkit.style.StyleManager.instance.addStyle(\"" + rule + "\", style);\n";
 				
 		code += "}()\n";
-		return Context.parseInlineString(code, Context.currentPos());
-	}
-	
-	private static var componentClasses:Map<String, String> = new Map<String, String>();
-	macro public static function registerComponentPackage(pack:String):Expr {
-
-		var code:String = "function() {\n";
-		var currentClassName:String = Context.getLocalClass().toString();
-		var arr:Array<String> = pack.split(".");
-		var paths:Array<String> = Context.getClassPath();
-		
-		for (path in paths) {
-			var dir:String = path + arr.join("/");
-			if(!sys.FileSystem.exists(dir) || !sys.FileSystem.isDirectory(dir)) {
-				continue;
-			}
-			var files:Array<String> = sys.FileSystem.readDirectory(dir);
-			if (files != null) {
-				for (file in files) {
-					if (StringTools.endsWith(file, ".hx") && !StringTools.startsWith(file, ".")) {
-						var name:String = file.substr(0, file.length - 3);
-						var path:String = Context.resolvePath(dir + "/" + file);
-						
-						var types:Array<haxe.macro.Type> = Context.getModule(pack + "." + name);
-						
-						for (t in types) {
-							var className:String = getClassNameFromType(t);
-							if (hasInterface(t, "haxe.ui.toolkit.core.interfaces.IDisplayObject")) {
-								if (className == pack + "." + name) {
-									var entryName:String = name.toLowerCase();
-									componentClasses.set(entryName, className);
-									if (currentClassName.indexOf("ClassManager") != -1) {
-										code += "\tregisterComponentClass(" + className + ", '" + name.toLowerCase() + "');\n";
-									} else {
-										code += "\tClassManager.instance.registerComponentClass(" + className + ", '" + name.toLowerCase() + "');\n";
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		code += "}()\n";
-		//trace(code);
-		return Context.parseInlineString(code, Context.currentPos());
-	}
-	
-	macro public static function registerDataSourcePackage(pack:String):Expr {
-		
-		var code:String = "function() {\n";
-		var currentClassName:String = Context.getLocalClass().toString();
-		var arr:Array<String> = pack.split(".");
-		var paths:Array<String> = Context.getClassPath();
-
-		for (path in paths) {
-			var dir:String = path + arr.join("/");
-			if(!sys.FileSystem.exists(dir) || !sys.FileSystem.isDirectory(dir)) {
-				continue;
-			}
-			var files:Array<String> = sys.FileSystem.readDirectory(dir);
-			if (files != null) {
-				for (file in files) {
-					if (StringTools.endsWith(file, ".hx") && !StringTools.startsWith(file, ".")) {
-						var name:String = file.substr(0, file.length - 3);
-						var path:String = Context.resolvePath(dir + "/" + file);
-						
-						var types:Array<haxe.macro.Type> = Context.getModule(pack + "." + name);
-						
-						for (t in types) {
-							var className:String = getClassNameFromType(t);
-							if (hasInterface(t, "haxe.ui.toolkit.data.IDataSource")) {
-								if (className == pack + "." + name) {
-									name = StringTools.replace(name, "DataSource", "");
-									if (name.length > 0) {
-										if (currentClassName.indexOf("ClassManager") != -1) {
-											code += "\tregisterDataSourceClass(" + className + ", '" + name.toLowerCase() + "');\n";
-										} else {
-											code += "\tClassManager.instance.registerDataSourceClass(" + className + ", '" + name.toLowerCase() + "');\n";
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		code += "}()\n";
-		//trace(code);
 		return Context.parseInlineString(code, Context.currentPos());
 	}
 	
@@ -484,6 +625,24 @@ class Macros {
 			}
 		}
 		return has;
+	}
+	
+	private static function getClassName(t:haxe.macro.Type):String {
+		var name:String = null;
+		switch (t) {
+				case TAnonymous(t): {};
+				case TMono(t): {};
+				case TLazy(t): {};
+				case TFun(t, _): {};
+				case TDynamic(t): {};
+				case TInst(t, _): {
+					name = t.get().module;
+				}
+				case TEnum(t, _): {};
+				case TType(t, _): {};
+				case TAbstract(t, _): {};
+		}
+		return name;
 	}
 	
 	private static function hasInterface(t:haxe.macro.Type, interfaceRequired:String):Bool {
@@ -527,11 +686,29 @@ class Macros {
 		#if (flash || html5)
 		return resourcePath;
 		#else
-		var subs = ["/", "/assets/"];
+		
+		var subs = ["/"];
+		var candidates:Array<String> = ["project.xml", "application.xml"];
+		for (c in candidates) {
+			if (sys.FileSystem.exists(c)) {
+				var xml:Xml = Xml.parse(sys.io.File.getContent(c));
+				var assetPaths:Array<String> = XmlUtil.getPathValues(xml.firstElement(), "/project/assets/@path");
+				for (p in assetPaths) {
+					if (StringTools.startsWith(p, "/") == false) {
+						p = "/" + p;
+					}
+					if (StringTools.endsWith(p, "/") == false) {
+						p = p + "/";
+					}
+					subs.push(p);
+				}
+				break;
+			}
+		}
+		
 		var found = false;
 		if (sys.FileSystem.exists(resourcePath) == false) {
 			for (path in paths) {
-				
 				for (s in subs) {
 					var test = path + s + resourcePath;	
 					if (test.indexOf("/") == 0 || test.indexOf("\\") == 0) {

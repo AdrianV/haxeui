@@ -1,7 +1,7 @@
 package haxe.ui.toolkit.controls;
 
-import flash.events.Event;
-import flash.events.MouseEvent;
+import openfl.events.Event;
+import openfl.events.MouseEvent;
 import haxe.ds.StringMap;
 import haxe.ui.toolkit.core.base.VerticalAlign;
 import haxe.ui.toolkit.core.Component;
@@ -34,6 +34,17 @@ class OptionBox extends Component implements IClonable<OptionBox> {
 		_label = new Text();
 		_layout = new HorizontalLayout();
 		_autoSize = true;
+	}
+	
+	override public function dispose():Void {
+		
+		// removes this component groups list.
+		if (group != null) {
+			var arr:Array<OptionBox> = _groups.get(_group);
+			arr.remove(this);
+		}
+		
+		super.dispose();
 	}
 	
 	//******************************************************************************************
