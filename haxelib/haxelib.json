@@ -4,8 +4,8 @@
     "license"      : "MIT",
     "tags"         : ["rich", "ui"],
     "description"  : "Styleable application centric rich UI",
-    "version"      : "1.4.9",
-    "releasenote"  : "Fixed neko issues with removing event listeners",
+    "version"      : "1.4.14",
+    "releasenote"  : "Fixed problems with styling from code",
     "contributors" : ["ianharrigan"],
     "dependencies" : {
         "openfl"        : "",

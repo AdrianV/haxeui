@@ -30,10 +30,11 @@ class Toolkit {
 	}
 	
 	public static function init():Void {
-		#if dconsole
+		#if HXUI_CONSOLE
 		haxe.ui.toolkit.console.HaxeUIConsole.init();
 		#end
 		
+		Macros.beginProfile();		
 		Macros.registerModules();
 		get_instance();
 		registerXMLProcessor(UIProcessor, "ui");
@@ -60,6 +61,7 @@ class Toolkit {
 		if (t != null) {
 			t.apply();
 		}
+		Macros.endProfile();		
 	}
 
 	private static var _registeredProcessors:StringMap<String>;

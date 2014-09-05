@@ -1,5 +1,6 @@
 package haxe.ui.toolkit.controls.selection;
 
+import haxe.ui.toolkit.core.Screen;
 import openfl.events.Event;
 import openfl.events.MouseEvent;
 import openfl.filters.DropShadowFilter;
@@ -27,9 +28,9 @@ class DateSelector extends Button {
 	private override function preInitialize():Void {
 		super.preInitialize();
 		
-		if (_style != null) {
-			if (_style.selectionMethod != null) {
-				_method = _style.selectionMethod;
+		if (_baseStyle != null) {
+			if (_baseStyle.selectionMethod != null) {
+				_method = _baseStyle.selectionMethod;
 			}
 		}
 	}
@@ -51,9 +52,9 @@ class DateSelector extends Button {
 	public override function applyStyle():Void {
 		super.applyStyle();
 		
-		if (_style != null) {
-			if (_style.selectionMethod != null && _method == null) {
-				_method = _style.selectionMethod;
+		if (_baseStyle != null) {
+			if (_baseStyle.selectionMethod != null && _method == null) {
+				_method = _baseStyle.selectionMethod;
 			}
 		}
 	}
@@ -87,6 +88,12 @@ class DateSelector extends Button {
 			_cal.x = this.stageX - root.stageX;
 			_cal.y = this.stageY + this.height - root.stageY;
 			_cal.sprite.filters = [ new DropShadowFilter (4, 45, 0x808080, 1, 4, 4, 1, 3) ];
+			if (_cal.stageY + _cal.height > Screen.instance.height) {
+				_cal.y = this.stageY - _cal.height;
+				this.styleName = "dropUp";
+			} else {
+				this.styleName = null;
+			}
 			
 			var transition:String = Toolkit.getTransitionForClass(DateSelector);
 			if (transition == "slide") {

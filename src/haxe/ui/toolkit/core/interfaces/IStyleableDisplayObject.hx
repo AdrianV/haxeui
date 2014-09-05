@@ -4,6 +4,7 @@ import haxe.ui.toolkit.style.Style;
 
 interface IStyleableDisplayObject extends IDisplayObjectContainer {
 	public var id(get, set):String;
+	public var baseStyle(get, set):Style;
 	public var style(get, set):Style;
 	public var styleName(get, set):String;
 
