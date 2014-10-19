@@ -3,6 +3,7 @@ package haxe.ui.toolkit.core.renderers;
 import haxe.ui.toolkit.controls.Button;
 import haxe.ui.toolkit.controls.HSlider;
 import haxe.ui.toolkit.controls.Image;
+import haxe.ui.toolkit.controls.TextInput;
 import haxe.ui.toolkit.core.base.VerticalAlign;
 import haxe.ui.toolkit.core.Component;
 
@@ -11,6 +12,11 @@ class ComponentItemRenderer extends BasicItemRenderer {
 	
 	public function new() {
 		super();
+	}
+	
+	public var component(get, null):Component;
+	private function get_component():Component {
+		return _component;
 	}
 	
 	private override function set_data(value:Dynamic):Dynamic {
@@ -24,7 +30,7 @@ class ComponentItemRenderer extends BasicItemRenderer {
 				_component = Type.createInstance(cls, []);
 				_component.verticalAlign = VerticalAlign.CENTER;
 				_component.id = "componentValue";
-				_component.styleName = value.controlId;
+				_component.styleName = value.componentStyleName;
 				if (value.componentSize != null) {
 					var cx:Int = value.componentSize;
 					_component.autoSize = false;
@@ -44,6 +50,8 @@ class ComponentItemRenderer extends BasicItemRenderer {
 			return HSlider;
 		} else if (type == "image") {
 			return Image;
+		} else if (type == "textinput") {
+			return TextInput;
 		}
 		return null;
 	}
