@@ -28,7 +28,7 @@ class Main {
 		//Toolkit.theme = new DefaultTheme();
 		//Toolkit.theme = new GradientTheme();
 		//Toolkit.theme = new WindowsTheme();
-		Toolkit.theme = "gradient";
+		//Toolkit.theme = "gradient";
 		//Macros.addStyleSheet("assets/test.css");
 		Toolkit.setTransitionForClass(Stack, "none");
 		//Toolkit.addScriptletClass("Client", ClientWrapper);
@@ -40,7 +40,7 @@ class Main {
 		b.width = 800;
 		b.height = 600;
 		*/
-		
+		//Toolkit.scaleFactor = 2;
 		Toolkit.open(function(root:Root) {
 			var view:Component = Toolkit.processXmlResource("assets/test2.xml");
 			/*

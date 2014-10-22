@@ -44,6 +44,8 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	private var _sprite:Sprite;
 	private var _halign:String = "left";
 	private var _valign:String = "top";
+	private var _includeInLayout:Bool = true;
+	private var _alpha:Float = 1;
 
 	private var _eventListeners:StringMap < Array < Dynamic->Void >> ;
 	
@@ -109,6 +111,10 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	public var stageY(get, null):Float;
 	public var visible(get, set):Bool;
 	@:clonable
+	public var alpha(get, set):Float;
+	@:clonable
+	public var includeInLayout(get, set):Bool;
+	@:clonable
 	public var horizontalAlign(get, set):String;
 	@:clonable
 	public var verticalAlign(get, set):String;
@@ -163,7 +169,7 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	}
 	
 	private function get_width():Float {
-		return _width;
+		return _width / sprite.scaleX;
 	}
 	
 	private function set_width(value:Float):Float {
@@ -185,7 +191,7 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	}
 	
 	private function get_height():Float {
-		return _height;
+		return _height / sprite.scaleY;
 	}
 	
 	private function set_height(value:Float):Float {
@@ -283,6 +289,30 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	
 	private function set_visible(value:Bool):Bool {
 		_sprite.visible = value;
+		if (_parent != null) {
+			_parent.invalidate(InvalidationFlag.LAYOUT);
+		}
+		return value;
+	}
+
+	private function get_alpha():Float {
+		return _alpha;
+	}
+	
+	private function set_alpha(value:Float):Float {
+		if (value != _alpha) {
+			_alpha = value;
+			invalidate();
+		}
+		return value;
+	}
+	
+	private function get_includeInLayout():Bool {
+		return _includeInLayout;
+	}
+	
+	private function set_includeInLayout(value:Bool):Bool {
+		_includeInLayout = value;
 		if (_parent != null) {
 			_parent.invalidate(InvalidationFlag.LAYOUT);
 		}
