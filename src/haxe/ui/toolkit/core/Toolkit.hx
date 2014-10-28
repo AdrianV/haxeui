@@ -19,6 +19,8 @@ import haxe.ui.toolkit.themes.DefaultTheme;
 import haxe.ui.toolkit.themes.Theme;
 
 class Toolkit {
+	private static inline var DPI_THRESHOLD:Int = 120;
+	
 	private static var _instance:Toolkit;
 	public static var instance(get, null):Toolkit;
 	private static function get_instance():Toolkit {
@@ -35,7 +37,6 @@ class Toolkit {
 		haxe.ui.toolkit.console.HaxeUIConsole.init();
 		#end
 		
-		Macros.beginProfile();		
 		Macros.registerModules();
 		get_instance();
 		registerXMLProcessor(UIProcessor, "ui");
@@ -62,7 +63,6 @@ class Toolkit {
 		if (t != null) {
 			t.apply();
 		}
-		Macros.endProfile();		
 	}
 
 	private static var _registeredProcessors:StringMap<String>;
@@ -299,8 +299,8 @@ class Toolkit {
 		if (_scaleFactor == 0) {
 			if (autoScale == true) {
 				scaleFactor = openfl.system.Capabilities.screenDPI;
-				if (_scaleFactor > 120) {
-					_scaleFactor /= 120;
+				if (_scaleFactor > DPI_THRESHOLD) {
+					_scaleFactor /= DPI_THRESHOLD;
 				} else {
 					_scaleFactor = 1;
 				}
