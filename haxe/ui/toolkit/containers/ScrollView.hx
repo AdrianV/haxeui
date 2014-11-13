@@ -30,7 +30,7 @@ class ScrollView extends StateComponent {
 	private var _eventTarget:Sprite;
 	private var _downPos:Point;
 
-	private var _inertiaSpeed:Point;
+	private var _inertiaSpeed:Point = new Point(0, 0);
 	private var _inertiaTime:Float;
 	private var _inertiaSensitivity:Float = 5;
 	private var _inertialScrolling:Bool = false;
@@ -587,12 +587,15 @@ class ScrollView extends StateComponent {
 			} else {
 				_hscroll.visible = true;
 			}
+			invalidateLayout = true;
 			addChild(_hscroll);
 			created = true;
 		}
 		
 		if (invalidateLayout) {
-			_invalidating = false;
+			if (percentWidth == -1) {
+				_invalidating = false;
+			}
 			invalidate(InvalidationFlag.LAYOUT);
 		}
 		
@@ -613,11 +616,15 @@ class ScrollView extends StateComponent {
 			} else {
 				_vscroll.visible = true;
 			}
+			invalidateLayout = true;
 			addChild(_vscroll);
+			created = true;
 		}
 				
 		if (invalidateLayout) {
-			_invalidating = false;
+			if (percentHeight == -1) {
+				_invalidating = false;
+			}
 			invalidate(InvalidationFlag.LAYOUT);
 		}
 		return created;
@@ -670,7 +677,7 @@ class ScrollView extends StateComponent {
 	}
 }
 
-@exclude
+@:dox(hide)
 class ScrollViewLayout extends DefaultLayout {
 	private var _inlineScrolls:Bool = false;
 	
