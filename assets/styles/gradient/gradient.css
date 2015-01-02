@@ -74,6 +74,7 @@ Button {
 	filter: dropShadow(2, 45, 0x808080, 1, 4, 4, 1, 3);
 	fontScale: 1;
 	spacing: 5;
+	textAlign: "center";
 }
 
 Button:over {
@@ -764,6 +765,7 @@ MenuItem {
 	borderSize: 0;
 	backgroundColor: 0xE9EDF5;
 	color: 0x000000;
+	textAlign: "left";
 }
 
 MenuItem:over {
@@ -837,6 +839,19 @@ MenuBar Button:down {
 	backgroundColorGradientEnd: 0x3f4c6b;
 	color: 0xFFFFFF;
 	borderColor: 0x495267;
+}
+
+MenuSeparator {
+	width: 100%;
+	paddingLeft: 5;
+	paddingRight: 5;
+	paddingTop: 5;
+	paddingBottom: 5;
+}
+
+MenuSeparator #line {
+	height: 1;
+	backgroundColor: 0xCCCCCC;
 }
 
 ListSelector, DateSelector {
@@ -1031,8 +1046,8 @@ Popup #titleBar Button.close {
 	autoSize: false;
 	width: 10;
 	height: 10;
-	horizontalAlignment: right;
-	verticalAlignment: center;
+	horizontalAlignment: "right";
+	verticalAlignment: "center";
 	filter: none;
 	backgroundImage: "styles/gradient/cross_light_small.png";
 	backgroundColor: -1;
@@ -1092,6 +1107,7 @@ Button.expandable {
 	fontName: "_sans";
 	filter: dropShadow(2, 45, 0x808080, 1, 4, 4, 1, 3);
 	icon: "styles/gradient/arrow_right2.png";
+	textAlign: "left";
 }
 
 Button.expandable:over {
@@ -1281,4 +1297,67 @@ Divider #text {
 Divider #line {
 	height: 2;
 	backgroundColor: 0x3f4c6b;
+}
+
+HSplitter, VSplitter {
+	backgroundColor: -1;
+	spacing: 0;
+}
+
+HSplitterGripper {
+	backgroundColor: 0xDDDDDD;
+	filter: none;
+	cornerRadius: 0;
+	borderSize: 0;
+	icon: "styles/gradient/hsplitter_gripper.png";
+	padding: 0;
+	width: 7;
+	autoSize: false;
+	height: 100%;
+	iconPosition: center;
+}
+
+HSplitterGripper:over {
+	backgroundColor: 0xCCCCCC;
+}
+
+HSplitterGripper:down {
+	backgroundColor: 0xBBBBBB;
+}
+
+VSplitterGripper {
+	backgroundColor: 0xDDDDDD;
+	filter: none;
+	cornerRadius: 0;
+	borderSize: 0;
+	icon: "styles/gradient/vsplitter_gripper.png";
+	padding: 0;
+	width: 100%;
+	autoSize: false;
+	height: 7;
+	iconPosition: center;
+}
+
+VSplitterGripper:over {
+	backgroundColor: 0xCCCCCC;
+}
+
+VSplitterGripper:down {
+	backgroundColor: 0xBBBBBB;
+}
+
+Link {
+	backgroundColor: -1;
+	color: 0x4b546a;
+	fontUnderline: false;
+}
+
+Link:over {
+	color: 0x2c354b;
+	fontUnderline: true;
+}
+
+Link:down {
+	color: 0x606c88;
+	fontUnderline: true;
 }

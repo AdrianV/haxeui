@@ -74,7 +74,8 @@ class DefaultStyles extends Styles {
 			borderSize: 1,
 			cornerRadius: 2,
 			filter: new DropShadowFilter(2, 45, 0x444444, 1, 2, 2, 1, 3),
-			spacing: 5
+			spacing: 5,
+			textAlign: "center"
 		} ));
 		
 		
@@ -100,6 +101,7 @@ class DefaultStyles extends Styles {
 		
 		addStyle("Button.expandable", new Style( {
 			icon: "styles/default/expand.png",
+			textAlign: "left",
 		} ));
 		
 		addStyle("Button.expandable:down", new Style( {
@@ -619,6 +621,7 @@ class DefaultStyles extends Styles {
 			cornerRadius: 0,
 			backgroundColor: 0xcccccc,
 			color: 0x222222,
+			textAlign: "left"
 		} ));
 
 		addStyle("MenuItem:over", new Style( {
@@ -637,7 +640,20 @@ class DefaultStyles extends Styles {
 			icon: "styles/default/expand.png",
 		} ));
 		
+		addStyle("MenuSeparator", new Style( {
+			backgroundColor: 0x888888,
+			percentWidth: 100,
+			paddingTop: 2,
+			paddingLeft: 5,
+			paddingBottom: 3,
+			paddingRight: 5,
+		} ));
 
+		addStyle("MenuSeparator #line", new Style( {
+			height: 0,
+			backgroundColor: 0x888888
+		} ));
+		
 		addStyle("Divider", new Style( {
 			paddingTop: 5,
 			percentWidth: 100,
