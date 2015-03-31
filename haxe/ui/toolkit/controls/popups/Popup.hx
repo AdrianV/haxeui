@@ -69,6 +69,11 @@ class Popup extends VBox implements IDraggable {
 		if (_config.styleName != null) {
 			this.styleName = _config.styleName;
 		}
+		if (_config.dismiss & Dismiss.CLICK_INSIDE > 0)
+			addEventListener(MouseEvent.CLICK, function(e) {
+				PopupManager.instance.hidePopup(this);
+				callClosingCallback(PopupButton.CANCEL);
+			});
 		
 		_fn = fn;
 	}
@@ -140,9 +145,10 @@ class Popup extends VBox implements IDraggable {
 	//******************************************************************************************
 	/**
 	 Determines if the popup can be dragged by ensuring the mouse is in the title bar
+	 or that dragging outside the title bar is allowed.
 	 **/
 	public function allowDrag(event:MouseEvent):Bool {
-		return _titleBar.hitTest(event.stageX, event.stageY);
+		return _config.dragAnywhere || (_titleBar == null ? false : _titleBar.hitTest(event.stageX, event.stageY));
 	}
 
 	//******************************************************************************************
@@ -217,5 +223,10 @@ class Popup extends VBox implements IDraggable {
 		if (_fn != null) {
 			_fn(button);
 		}
+	}
+	
+	public function callClosingCallback(button:Dynamic) {
+		if (_fn != null)
+			_fn(button);
 	}
 }

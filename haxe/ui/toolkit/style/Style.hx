@@ -35,6 +35,9 @@ class Style implements IClonable<Style> {
 	private var _paddingBottom:Int = -1;
 	private var _spacingX:Int = -1;
 	private var _spacingY:Int = -1;
+	private var _rotationX:Float = -1;
+	private var _rotationY:Float = -1;
+	private var _rotationZ:Float = -1;
 	private var _verticalAlignment:String;
 	private var _horizontalAlignment:String;
 	private var _cornerRadiusTopLeft:Int = -1;
@@ -59,6 +62,8 @@ class Style implements IClonable<Style> {
 	private var _selectionMethod:String;
 	private var _autoHideScrolls:Int = -1;
 	private var _inlineScrolls:Int = -1;
+	
+	private var _listSize:Int = -1;
 
 	public var width(get, set):Int;
 	public var height(get, set):Int;
@@ -111,6 +116,8 @@ class Style implements IClonable<Style> {
 	
 	public var target(get, set):IDisplayObject;
 	public var autoApply(get, set):Bool;
+	
+	public var listSize(get, set):Int;
 	
 	public function new(defaults:Dynamic = null) {
 		for (field in Reflect.fields(defaults)) {
@@ -517,6 +524,51 @@ class Style implements IClonable<Style> {
 		return value;
 	}
 
+	private function get_rotationX():Float {
+		if (hasDynamicValue("rotationX")) {
+			return getDynamicValue("rotationX");
+		}
+		return _rotationX;
+	}
+	
+	private function set_rotationX(value:Float):Float {
+		if (value != _rotationX) {
+			_rotationX = value;
+			apply();
+		}
+		return value;
+	}
+	
+	private function get_rotationY():Float {
+		if (hasDynamicValue("rotationY")) {
+			return getDynamicValue("rotationY");
+		}
+		return _rotationY;
+	}
+	
+	private function set_rotationY(value:Float):Float {
+		if (value != _rotationY) {
+			_rotationY = value;
+			apply();
+		}
+		return value;
+	}
+	
+	private function get_rotationZ():Float {
+		if (hasDynamicValue("rotationZ")) {
+			return getDynamicValue("rotationZ");
+		}
+		return _rotationY;
+	}
+	
+	private function set_rotationZ(value:Float):Float {
+		if (value != _rotationZ) {
+			_rotationZ = value;
+			apply();
+		}
+		return value;
+	}
+	
 	private function get_horizontalAlignment():String {
 		if (hasDynamicValue("horizontalAlignment")) {
 			return getDynamicValue("horizontalAlignment");
@@ -923,7 +975,22 @@ class Style implements IClonable<Style> {
 		apply();
 		return value;
 	}
-
+	
+	private function get_listSize():Int {
+		if (hasDynamicValue("listSize")) {
+			return getDynamicValue("listSize");
+		}
+		
+		return _listSize;
+	}
+	
+	private function set_listSize(value:Int):Int {
+		_listSize = value;
+		apply();
+		
+		return value;
+	}
+	
 	private function apply():Void {
 		if (_target != null && _autoApply == true) {
 			if (Std.is(_target, StyleableDisplayObject)) {
@@ -1008,6 +1075,8 @@ class Style implements IClonable<Style> {
 		if (with._selectionMethod != null) this._selectionMethod = with._selectionMethod;
 		if (with._autoHideScrolls != -1) this._autoHideScrolls = with._autoHideScrolls;
 		if (with._inlineScrolls != -1) this._inlineScrolls = with ._inlineScrolls;
+		if (with ._listSize != -1) this._listSize = with ._listSize;
+		
 		if (with._dynamicValues != null) {
 			if (_dynamicValues == null) {
 				_dynamicValues = new Map<String, String>();
@@ -1017,6 +1086,7 @@ class Style implements IClonable<Style> {
 				_dynamicValues.set(property, script);
 			}
 		}
+		
 	}
 	
 	public function toString():String {

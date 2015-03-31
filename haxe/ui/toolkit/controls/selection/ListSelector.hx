@@ -82,6 +82,10 @@ class ListSelector extends Button implements IDataComponent {
 			if (_baseStyle.selectionMethod != null && _method == null) {
 				_method = _baseStyle.selectionMethod;
 			}
+			
+			if (_baseStyle.listSize != -1) {
+				listSize = _baseStyle.listSize;
+			}
 		}
 	}
 	

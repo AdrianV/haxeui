@@ -1314,7 +1314,7 @@ HSplitterGripper {
 	width: 7;
 	autoSize: false;
 	height: 100%;
-	iconPosition: center;
+	iconPosition: "center";
 }
 
 HSplitterGripper:over {
@@ -1335,7 +1335,7 @@ VSplitterGripper {
 	width: 100%;
 	autoSize: false;
 	height: 7;
-	iconPosition: center;
+	iconPosition: "center";
 }
 
 VSplitterGripper:over {
@@ -1360,4 +1360,18 @@ Link:over {
 Link:down {
 	color: 0x606c88;
 	fontUnderline: true;
+}
+
+ToolTip {
+	borderColor: 0x495267;
+	borderSize: 1;
+	backgroundColor: 0xFFFFFF;
+	backgroundAlpha: 1;
+	cornerRadius: 2;
+	padding: 2;
+	filter: dropShadow(1, 45, 0x808080, 1, 2, 2, 1, 3);
+}
+
+ToolTip Text {
+	fontSize: 10;
 }

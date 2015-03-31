@@ -1,16 +1,22 @@
 {
-    "name"         : "haxeui",
-    "url"          : "https://github.com/ianharrigan/haxeui",
-    "license"      : "MIT",
-    "tags"         : ["rich", "ui"],
-    "description"  : "Styleable application centric rich UI",
-    "version"      : "1.6.16",
-    "releasenote"  : "Embedded resources and other build options",
-    "contributors" : ["ianharrigan"],
-    "dependencies" : {
-        "openfl"        : "",
-        "actuate"       : "",
-        "hscript"       : "",
-        "svg"           : ""
+    "name": "haxeui",
+    "license": "MIT",
+    "tags": [
+        "rich",
+        "ui"
+    ],
+    "description": "Styleable application centric rich UI",
+    "contributors": [
+        "ianharrigan"
+    ],
+    "releasenote": "Added ability to load images over http",
+    "version": "1.7.6",
+    "url": "https://github.com/ianharrigan/haxeui",
+    "dependencies": {
+        "yagp": "1.1.4",
+        "actuate": "1.8.3",
+        "svg": "1.0.8",
+        "openfl": "3.0.0-beta",
+        "hscript": "2.0.4"
     }
 }
