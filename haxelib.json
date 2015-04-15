@@ -9,14 +9,14 @@
     "contributors": [
         "ianharrigan"
     ],
-    "releasenote": "Added ability to load images over http",
-    "version": "1.7.6",
+    "releasenote": "Added resource hooks",
+    "version": "1.7.11",
     "url": "https://github.com/ianharrigan/haxeui",
     "dependencies": {
         "yagp": "1.1.4",
         "actuate": "1.8.3",
         "svg": "1.0.8",
-        "openfl": "3.0.0-beta",
+        "openfl": "3.0.1",
         "hscript": "2.0.4"
     }
 }

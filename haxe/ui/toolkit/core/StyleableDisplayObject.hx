@@ -235,6 +235,10 @@ class StyleableDisplayObject extends DisplayObjectContainer implements IStyleabl
 				_sprite.filters = [];
 			}
 			//#end
+			
+			if (_baseStyle.visibleSet == true) {
+				this.visible = _baseStyle.visible;
+			}
 		}
 		
 		invalidate(InvalidationFlag.DISPLAY);
@@ -244,8 +248,15 @@ class StyleableDisplayObject extends DisplayObjectContainer implements IStyleabl
 		
 	}
 	
-	private function clearStyles():Void {
+	public function clearStyles(recursive:Bool = false):Void {
 		_storedStyles = new StringMap<Style>();
+		if (recursive == true && children != null) {
+			for (c in children) {
+				if (Std.is(c, StyleableDisplayObject)) {
+					cast(c, StyleableDisplayObject).clearStyles(recursive);
+				}
+			}
+		}
 	}
 	
 	private function refreshStyle():Void {
