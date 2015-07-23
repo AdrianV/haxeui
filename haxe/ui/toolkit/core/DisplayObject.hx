@@ -36,6 +36,9 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	private var _x:Float = 0;
 	private var _y:Float = 0;
 	private var _z:Float = 0;
+	private var _rotationX:Float = 0;
+	private var _rotationY:Float = 0;
+	private var _rotationZ:Float = 0;
 	private var _width:Float = 0;
 	private var _height:Float = 0;
 	private var _percentWidth:Float = -1;
@@ -100,8 +103,12 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	public var x(get, set):Float;
 	@:clonable
 	public var y(get, set):Float;
+	
+	#if !html5
 	@:clonable
 	public var z(get, set):Float;
+	#end
+	
 	@:clonable
 	public var rotationX(get, set):Float;
 	@:clonable
@@ -183,18 +190,22 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 		return value;
 	}
 
-	
+	#if !html5
 	private function get_z():Float {
 		return _z;
 	}
 	
 	private function set_z(value:Float):Float {
+		if (_z == Std.int(value)) {
+			return value;
+		}
 		_z = Std.int(value);
 		#if flash
 		_sprite.z = _z;
 		#end
 		return value;
 	}
+	#end
 	
 	private function get_rotationX():Float {
 		#if flash
@@ -205,6 +216,10 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	}
 	
 	private function set_rotationX(value:Float):Float {
+		if (value == _rotationX) {
+			return value;
+		}
+		_rotationX = value;
 		#if flash
 		_sprite.rotationX = value;
 		#end
@@ -220,6 +235,10 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	}
 	
 	private function set_rotationY(value:Float):Float {
+		if (value == _rotationY) {
+			return value;
+		}
+		_rotationY = value;
 		#if flash
 		_sprite.rotationY = value;
 		#end
@@ -235,6 +254,10 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 	}
 	
 	private function set_rotationZ(value:Float):Float {
+		if (value == _rotationZ) {
+			return value;
+		}
+		_rotationZ = value;
 		#if flash
 		_sprite.rotationZ = value;
 		#end
@@ -448,6 +471,8 @@ class DisplayObject implements IEventDispatcher implements IDisplayObject implem
 		var b:Bool = false;
 		var sx:Float = stageX;
 		var sy:Float = stageY;
+		xpos /= Toolkit.scaleFactor;
+		ypos /= Toolkit.scaleFactor;
 		if (xpos > sx && xpos < sx + width && ypos > sy && ypos < sy + height) {
 			b = true;
 		}
