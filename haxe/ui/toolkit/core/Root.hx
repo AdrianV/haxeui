@@ -87,7 +87,7 @@ class Root extends Component {
 			_modalOverlay = new Component();
 			_modalOverlay.id = "modalOverlay";
 			_modalOverlay.percentWidth = _modalOverlay.percentHeight = 100;
-			_modalOverlay.onClick = function(e) {
+			(_modalOverlay :Dynamic).onClick = function(e) {
 				PopupManager.instance.dismissModal(Dismiss.CLICK_OUTSIDE);
 			};
 		}
