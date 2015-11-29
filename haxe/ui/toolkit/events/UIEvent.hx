@@ -22,6 +22,9 @@ class UIEvent extends Event {
 	public static inline var ROLL_OUT:String = PREFIX + "rollOut";
 	public static inline var CHANGE:String = PREFIX + "change";
 	public static inline var SCROLL:String = PREFIX + "scroll";
+	public static inline var SCROLL_START:String = PREFIX + "scrollStart";
+	public static inline var SCROLL_STOP:String = PREFIX + "scrollStop";
+	public static inline var REFRESH:String = PREFIX + "refresh";
 
 	public static inline var ADDED:String = PREFIX + "added";
 	public static inline var ADDED_TO_STAGE:String = PREFIX + "addedToStage";

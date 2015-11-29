@@ -1,10 +1,11 @@
 package haxe.ui.toolkit.controls;
 
+import haxe.ui.toolkit.core.Screen;
 import openfl.events.Event;
 import openfl.events.MouseEvent;
 import haxe.ds.StringMap;
 import haxe.ui.toolkit.core.base.VerticalAlign;
-import haxe.ui.toolkit.core.Component;
+import haxe.ui.toolkit.core.StateComponent;
 import haxe.ui.toolkit.core.interfaces.IClonable;
 import haxe.ui.toolkit.layout.HorizontalLayout;
 import haxe.ui.toolkit.style.Style;
@@ -14,12 +15,27 @@ import haxe.ui.toolkit.style.Style;
  **/
 
 @:event("UIEvent.CHANGE", "Dispatched when the value of the option box is modified") 
-class OptionBox extends Component implements IClonable<OptionBox> {
+class OptionBox extends StateComponent implements IClonable<OptionBox> {
+	/**
+	 Optionbox state is "normal" (default state)
+	 **/
+	public static inline var STATE_NORMAL = "normal";
+	/**
+	 Optionbox state is "over"
+	 **/
+	public static inline var STATE_OVER = "over";
+	/**
+	 Optionbox state is "down"
+	 **/
+	public static inline var STATE_DOWN = "down";
+	
 	private var _value:OptionBoxValue;
 	private var _label:Text;
 	
 	private var _group:String;
 	private static var _groups:StringMap<Array<OptionBox>>;
+	
+	private var _down:Bool = false;
 	
 	public function new() {
 		super();
@@ -62,6 +78,51 @@ class OptionBox extends Component implements IClonable<OptionBox> {
 				selected = !selected;
 			}
 		});
+		
+		addEventListener(MouseEvent.MOUSE_OVER, _onMouseOver);
+		addEventListener(MouseEvent.MOUSE_OUT, _onMouseOut);
+		addEventListener(MouseEvent.MOUSE_DOWN, _onMouseDown);
+		addEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
+	}
+	
+	//******************************************************************************************
+	// Event handlers
+	//******************************************************************************************
+	private function _onMouseOver(event:MouseEvent):Void {
+		if (event.buttonDown == false) {
+			state = STATE_OVER;
+		} else if (_down == true) {
+			state = STATE_DOWN;
+		}
+	}
+	
+	private function _onMouseOut(event:MouseEvent):Void {
+		if (event.buttonDown == false) {
+			state = STATE_NORMAL;
+		} else {
+			//Screen.instance.addEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
+		}
+	}
+	
+	private function _onMouseDown(event:MouseEvent):Void {
+		_down = true;
+		state = STATE_DOWN;
+		Screen.instance.addEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
+	}
+	
+	private function _onMouseUp(event:MouseEvent):Void {
+		_down = false;
+		if (hitTest(event.stageX, event.stageY)) {
+			#if !(android)
+				state = STATE_OVER;
+			#else
+				state = STATE_NORMAL;
+			#end
+		} else {
+			state = STATE_NORMAL;
+		}
+
+		Screen.instance.removeEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
 	}
 	
 	//******************************************************************************************
@@ -194,6 +255,13 @@ class OptionBox extends Component implements IClonable<OptionBox> {
 			}
 			_label.baseStyle = labelStyle;
 		}
+	}
+	
+	//******************************************************************************************
+	// IState
+	//******************************************************************************************
+	private override function get_states():Array<String> {
+		return [STATE_NORMAL, STATE_OVER, STATE_DOWN];
 	}
 }
 

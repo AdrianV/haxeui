@@ -2,25 +2,29 @@
 <project>
 	<set name="openfl-legacy" unless="web"/>
 	<!-- dependencies -->
-	<haxelib name="openfl" version="3.3.1"/>
+	<haxelib name="openfl" version="3.4.0"/>
 	<haxelib name="actuate" version="1.8.6"/>
+	<!--
 	<haxelib name="yagp" unless="haxeui-no-gif-support" version="1.1.4"/>
-	
-	<!-- Embed resources in final output -->
-	<section if="haxeui-embed-resources">
-		<assets path="assets" embed="true" rename="assets"/>
-		<assets path="assets/styles" embed="true" rename="styles"/>
-		<assets path="assets/fonts" embed="true" rename="fonts"/>
-		<haxedef name="haxeui-embed-resources"/>
+	-->
+
+	<section unless="haxeui-exclude-resources">
+
+		<!-- Embed resources in final output -->
+		<section if="haxeui-embed-resources">
+			<assets path="assets/styles" embed="true" rename="styles"/>
+			<assets path="assets/fonts" embed="true" rename="fonts"/>
+			<haxedef name="haxeui-embed-resources"/>
+		</section>
+
+		<!-- External resources to final output -->
+		<section unless="haxeui-embed-resources">
+			<assets path="assets/styles" rename="styles"/>
+			<assets path="assets/fonts" rename="fonts"/>
+		</section>
+
 	</section>
 
-	<!-- External resources to final output -->
-	<section unless="haxeui-embed-resources">
-		<assets path="assets" rename="assets"/>
-		<assets path="assets/styles" rename="styles"/>
-		<assets path="assets/fonts" rename="fonts"/>
-	</section>
-	
 	<!-- Override quality of bitmap filters, useful for mobiles -->
 	<haxedef name="filters-none" if="haxeui-filters-off"/>
 	<haxedef name="filters-high" if="haxeui-filters-high"/>

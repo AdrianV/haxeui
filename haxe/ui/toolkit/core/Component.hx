@@ -317,6 +317,13 @@ class Component extends StyleableDisplayObject implements IComponent implements 
 				|| type == MouseEvent.MOUSE_UP
 				|| type == MouseEvent.MOUSE_WHEEL
 				|| type == MouseEvent.CLICK
+				
+				|| type == UIEvent.MOUSE_DOWN
+				|| type == UIEvent.MOUSE_MOVE
+				|| type == UIEvent.MOUSE_OVER
+				|| type == UIEvent.MOUSE_OUT
+				|| type == UIEvent.MOUSE_UP
+				|| type == UIEvent.CLICK
 		);
 	}
 	
@@ -390,7 +397,9 @@ class Component extends StyleableDisplayObject implements IComponent implements 
 		try {
 			var parser = new hscript.Parser();
 			var line = parser.parseString(expr);
-			findInterp().expr(line);
+			var interp = findInterp();
+			interp.variables.set("this", this);
+			interp.expr(line);
 		} catch (e:Dynamic) {
 			trace("Problem executing scriptlet: " + e);
 		}
@@ -426,6 +435,7 @@ class Component extends StyleableDisplayObject implements IComponent implements 
 					var safeId = StringUtil.capitalizeHyphens(comp.id);
 					_interp.variables.set(safeId, comp);
 				}
+				_interp.variables.set("this", this);
 
 				_interp.execute(program);
 			} catch (e:Dynamic) {

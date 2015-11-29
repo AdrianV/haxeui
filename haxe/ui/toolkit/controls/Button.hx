@@ -139,6 +139,12 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 			if (_icon == null) {
 				_icon = new Image();
 				_icon.id = "icon";
+				if (_iconWidth != -1) {
+					_icon.width = _iconWidth;
+				}
+				if (_iconHeight != -1) {
+					_icon.height = _iconHeight;
+				}
 			}
 			if (_icon.resource != value) {
 				_icon.resource = value;
@@ -152,10 +158,48 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 		return value;
 	}
 	
+	private var _iconWidth:Float = -1;
+	public var iconWidth(get, set):Float;
+	private function get_iconWidth():Float {
+		return _iconWidth;
+	}
+	private function set_iconWidth(value:Float):Float {
+		if (value == _iconWidth) {
+			return value;
+		}
+		
+		_iconWidth = value;
+		if (_icon != null) {
+			_icon.width = _iconWidth;
+		}
+		
+		return value;
+	}
+	
+	private var _iconHeight:Float = -1;
+	public var iconHeight(get, set):Float;
+	private function get_iconHeight():Float {
+		return _iconHeight;
+	}
+	private function set_iconHeight(value:Float):Float {
+		if (value == _iconHeight) {
+			return value;
+		}
+		
+		_iconHeight = value;
+		if (_icon != null) {
+			_icon.height = _iconHeight;
+		}
+		
+		return value;
+	}
+	
+	
 	private function organiseChildren():Void {
 		if (_ready == false) {
 			return;
 		}
+		
 		removeAllChildren(false);
 		
 		if (_icon != null) {
@@ -171,7 +215,8 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 		if (autoSize == false || percentWidth > 0) {
 			if (_label != null) {
 				_label.percentWidth = 100;
-				_label.autoSize = false;
+				//_label.autoSize = false;
+				_label.autoSize = _multiline; //if multiline maintain autoSize so Text has the correct height
 			}
 		}
 		
@@ -201,7 +246,7 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
           _icon.width = width;
           _icon.height = height;
         }
-		
+
 		if (layout.usableHeight <= 0) {
 			var cy:Float = 0;
 			if (_label != null) {
@@ -229,6 +274,7 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 	#if html5
 	private var _mouseIn:Bool = false;
 	#end
+
 	private override function initialize():Void {
 		super.initialize();
 		
@@ -396,6 +442,8 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 		super.set_state(value);
 		if (value == STATE_DOWN) {
 			_down = true;
+		} else {
+			_down = false;
 		}
 		return value;
 	}
@@ -608,6 +656,9 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 				labelStyle.fontUnderline = _baseStyle.fontUnderline;
 				labelStyle.color = _baseStyle.color;
 				labelStyle.textAlign = _baseStyle.textAlign;
+				#if html5
+				labelStyle.backgroundColor = _baseStyle.backgroundColor;
+				#end
 			}
 			_label.baseStyle = labelStyle;
 		}
@@ -619,6 +670,14 @@ class Button extends StateComponent implements IFocusable implements IClonable<S
 			
 			if (_baseStyle.iconPosition != null) {
 				iconPosition = _baseStyle.iconPosition;
+			}
+			
+			if (_baseStyle.iconWidth != -1) {
+				iconWidth = _baseStyle.iconWidth;
+			}
+			
+			if (_baseStyle.iconHeight != -1) {
+				iconHeight = _baseStyle.iconHeight;
 			}
 		}
 	}

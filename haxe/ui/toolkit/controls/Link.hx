@@ -1,7 +1,6 @@
 package haxe.ui.toolkit.controls;
 
 import haxe.ui.toolkit.controls.Text;
-import haxe.ui.toolkit.core.Component;
 import haxe.ui.toolkit.core.Screen;
 import haxe.ui.toolkit.events.UIEvent;
 import openfl.events.MouseEvent;
@@ -39,7 +38,11 @@ class Link extends Text {
 	}
 	
 	private function _onScreenMouseDown(e:MouseEvent):Void {
-		if (hitTest(e.stageX, e.stageY) == true) {
+		if (ensureVisible() == false) {
+			return;
+		}
+		
+		if (hitTest(e.stageX, e.stageY) == true && parent.hitTest(e.stageX, e.stageY) == true) {
 			_isDown = true;
 			state = STATE_DOWN;
 			Screen.instance.addEventListener(MouseEvent.MOUSE_UP, _onScreenMouseUp);
@@ -47,7 +50,11 @@ class Link extends Text {
 	}
 
 	private function _onScreenMouseMove(e:MouseEvent):Void {
-		if (hitTest(e.stageX, e.stageY) == true) {
+		if (ensureVisible() == false) {
+			return;
+		}
+
+		if (hitTest(e.stageX, e.stageY) == true	&& parent.hitTest(e.stageX, e.stageY) == true) {
 			if (_isDown == true) {
 				state = STATE_DOWN;
 			} else {
@@ -61,8 +68,12 @@ class Link extends Text {
 	}
 	
 	private function _onScreenMouseUp(e:MouseEvent):Void {
+		if (ensureVisible() == false) {
+			return;
+		}
+		
 		Screen.instance.removeEventListener(MouseEvent.MOUSE_UP, _onScreenMouseUp);
-		if (hitTest(e.stageX, e.stageY) == true && _isDown == true) {
+		if (hitTest(e.stageX, e.stageY) == true && parent.hitTest(e.stageX, e.stageY) == true && _isDown == true) {
 			_isDown = false;
 			state = STATE_OVER;
 			
@@ -87,5 +98,23 @@ class Link extends Text {
 	//******************************************************************************************
 	private override function get_states():Array<String> {
 		return [STATE_NORMAL, STATE_OVER, STATE_DOWN];
+	}
+	
+	//******************************************************************************************
+	// Helpers
+	//******************************************************************************************
+	private function ensureVisible():Bool {
+		if (visible == false) {
+			return false;
+		}
+		var p = parent;
+		while (p != null) {
+			if  (p.visible == false) {
+				return false;
+			}
+			p = p.parent;
+		}
+		
+		return true;
 	}
 }

@@ -549,6 +549,7 @@ ListView #content {
 
 CheckBox {
 	spacingX: 2;
+	color: 0x000000;
 }
 
 CheckBoxValue {
@@ -597,6 +598,7 @@ CheckBoxValue #selected:disabled {
 
 OptionBox {
 	spacingX: 2;
+	color: 0x000000;
 }
 
 OptionBoxValue {
@@ -1375,4 +1377,26 @@ ToolTip {
 
 ToolTip Text {
 	fontSize: 10;
+}
+
+DefaultScrollViewRefreshPrompt {
+	width: 100%;
+	padding: 10;
+}
+
+DefaultScrollViewRefreshPrompt Text {
+	horizontalAlignment: center;
+	color: 0x606c88;
+	font-italic: true;
+}
+
+DefaultScrollViewRefreshing {
+	width: 100%;
+	padding: 10;
+}
+
+DefaultScrollViewRefreshing Text {
+	horizontalAlignment: center;
+	color: 0x606c88;
+	font-italic: true;
 }

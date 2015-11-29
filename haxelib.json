@@ -9,14 +9,13 @@
     "contributors": [
         "ianharrigan"
     ],
-    "releasenote": "Added checkboxes to item renderers",
-    "version": "1.7.16",
+    "releasenote": "Pull to refresh on all scrollviews",
+    "version": "1.8.0",
     "url": "https://github.com/ianharrigan/haxeui",
     "dependencies": {
-        "yagp": "1.1.4",
+        "lime": "2.7.0",
         "actuate": "1.8.6",
-        "svg": "1.0.8",
-        "openfl": "3.3.1",
-        "hscript": "2.0.4"
+        "openfl": "3.4.0",
+        "hscript": "2.0.5"
     }
 }
