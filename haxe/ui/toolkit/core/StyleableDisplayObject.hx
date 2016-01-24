@@ -230,10 +230,17 @@ class StyleableDisplayObject extends DisplayObjectContainer implements IStyleabl
 			
 			//#if !html5
 			if (_baseStyle.filter != null) {
-				_sprite.filters = [_baseStyle.filter];
+                if (_sprite.filters == null || _sprite.filters.indexOf(_baseStyle.filter) == -1) {
+				    _sprite.filters = [_baseStyle.filter];
+                }
 			} else {
 				_sprite.filters = [];
 			}
+            #if !flash
+            if (_sprite.alpha < 1) {
+                reapplyFilters();
+            }   
+            #end
 			//#end
 			
 			if (_baseStyle.visibleSet == true) {
@@ -244,6 +251,17 @@ class StyleableDisplayObject extends DisplayObjectContainer implements IStyleabl
 		invalidate(InvalidationFlag.DISPLAY);
 	}
 	
+    private function reapplyFilters():Void {
+        if (_sprite.filters != null && _sprite.filters.length > 0) {
+            _sprite.filters = _sprite.filters;
+        }
+        for (c in _children) {
+            if (Std.is(c, StyleableDisplayObject)) {
+                cast(c, StyleableDisplayObject).reapplyFilters();
+            }
+        }
+    }
+    
 	private function buildStyles():Void {
 		
 	}

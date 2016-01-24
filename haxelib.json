@@ -9,8 +9,8 @@
     "contributors": [
         "ianharrigan"
     ],
-    "releasenote": "Stop fixing openfl/lime versions",
-    "version": "1.8.4",
+    "releasenote": "Filter and alpha fix",
+    "version": "1.8.6",
     "url": "https://github.com/ianharrigan/haxeui",
     "dependencies": {
         "lime": "",
